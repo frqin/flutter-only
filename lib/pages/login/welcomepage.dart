@@ -44,16 +44,6 @@ class _WelcomePageState extends State<WelcomePage> {
               color: Colors.white,
             ),
             const SizedBox(height: 10),
-            const Text(
-              'N-Approval',
-              style: TextStyle(
-                color: Colors.white,
-                fontFamily: 'InriaSans',
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-                letterSpacing: 0.5,
-              ),
-            ),
           ],
         ),
       ),

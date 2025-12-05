@@ -1,8 +1,15 @@
-import 'package:flutter/material.dart';
+import 'package:ekspedisi/pages/ekspedisi/invoice_ekspor.dart';
+import 'package:ekspedisi/pages/ekspedisi/s_j_tagih.dart';
+import 'package:ekspedisi/pages/ekspedisi/s_j_umum.dart';
+import 'package:ekspedisi/pages/ekspedisi/scrap.dart';
 import 'package:ekspedisi/pages/login/welcomepage.dart';
+import 'package:flutter/material.dart';
+import 'package:intl/date_symbol_data_local.dart';
 
 void main() {
-  runApp(const MyApp());
+  initializeDateFormatting('id_ID', null).then((_) {
+    runApp(const MyApp());
+  });
 }
 
 class MyApp extends StatelessWidget {
@@ -11,13 +18,20 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Ekspedisi',
+      title: 'N-Approval',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: const WelcomePage(),
+      home: WelcomePage(),
+
+      routes: {
+        '/sj-umum': (context) => const SJUmumPage(),
+        '/scrap': (context) => const ScrapPage(),
+        '/sj-tagih': (context) => const SJTagihPage(),
+        '/invoice-export': (context) => InvoiceEksporPage(),
+      },
     );
   }
 }
