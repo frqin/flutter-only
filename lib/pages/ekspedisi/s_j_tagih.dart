@@ -66,15 +66,36 @@ class _SJTagihPageState extends State<SJTagihPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.grey.shade50,
       appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
         title: const Text(
           'Surat Jalan Tagih',
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 20,
+            color: Color(0xFF2F2F2F),
+            fontFamily: 'InriaSans',
+          ),
         ),
+        iconTheme: const IconThemeData(color: Color(0xFF2F2F2F)),
         actions: [
-          IconButton(icon: const Icon(Icons.search), onPressed: () {}),
-          IconButton(icon: const Icon(Icons.filter_list), onPressed: () {}),
+          IconButton(
+            icon: const Icon(Icons.search_rounded),
+            onPressed: () {},
+            tooltip: 'Cari',
+          ),
+          IconButton(
+            icon: const Icon(Icons.filter_list_rounded),
+            onPressed: () {},
+            tooltip: 'Filter',
+          ),
         ],
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(1),
+          child: Container(color: Colors.grey.shade200, height: 1),
+        ),
       ),
       body: ListView.builder(
         padding: const EdgeInsets.all(16),
@@ -88,58 +109,82 @@ class _SJTagihPageState extends State<SJTagihPage> {
   }
 
   Widget _buildSuratJalanCard(SuratJalan sj) {
-    return Card(
+    return Container(
       margin: const EdgeInsets.only(bottom: 16),
-      elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.06),
+            blurRadius: 10,
+            offset: const Offset(0, 3),
+          ),
+        ],
+      ),
       child: InkWell(
         onTap: () => _showDetailDialog(sj),
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(16),
         child: Padding(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(18),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
-                    sj.noSJ,
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: Color(0xFF2F2F2F),
+                  Expanded(
+                    child: Text(
+                      sj.noSJ,
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF2F2F2F),
+                        fontFamily: 'InriaSans',
+                      ),
                     ),
                   ),
                   _buildStatusChip(sj.status),
                 ],
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 16),
               _buildInfoRow(
-                Icons.calendar_today,
+                Icons.calendar_today_rounded,
                 'Tanggal',
                 '${sj.tanggal.day}/${sj.tanggal.month}/${sj.tanggal.year}',
               ),
-              const SizedBox(height: 8),
-              _buildInfoRow(Icons.receipt_long, 'No Order', sj.noOrder),
-              const SizedBox(height: 8),
-              _buildInfoRow(Icons.business, 'Customer', sj.customer),
-              const SizedBox(height: 8),
-              _buildInfoRow(Icons.local_shipping, 'Ekspedisi', sj.ekspedisi),
+              const SizedBox(height: 10),
+              _buildInfoRow(Icons.receipt_long_rounded, 'No Order', sj.noOrder),
+              const SizedBox(height: 10),
+              _buildInfoRow(Icons.business_rounded, 'Customer', sj.customer),
+              const SizedBox(height: 10),
+              _buildInfoRow(
+                Icons.local_shipping_rounded,
+                'Ekspedisi',
+                sj.ekspedisi,
+              ),
               const SizedBox(height: 16),
-              ElevatedButton(
-                onPressed: () => _showDetailDialog(sj),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF2F2F2F),
-                  foregroundColor: Colors.white,
-                  minimumSize: const Size(double.infinity, 44),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  onPressed: () => _showDetailDialog(sj),
+                  icon: const Icon(Icons.visibility_rounded, size: 18),
+                  label: const Text(
+                    'Lihat Detail & Upload TTD',
+                    style: TextStyle(
+                      fontFamily: 'InriaSans',
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
-                ),
-                child: const Text(
-                  'Lihat Detail & Upload TTD',
-                  style: TextStyle(fontFamily: 'InriaSans'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF2F2F2F),
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
                 ),
               ),
             ],
@@ -152,20 +197,33 @@ class _SJTagihPageState extends State<SJTagihPage> {
   Widget _buildInfoRow(IconData icon, String label, String value) {
     return Row(
       children: [
-        Icon(icon, size: 16, color: Colors.grey[600]),
-        const SizedBox(width: 8),
+        Container(
+          padding: const EdgeInsets.all(6),
+          decoration: BoxDecoration(
+            color: Colors.grey.shade100,
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Icon(icon, size: 16, color: Colors.grey[700]),
+        ),
+        const SizedBox(width: 10),
         Text(
           '$label: ',
           style: TextStyle(
-            fontSize: 14,
+            fontSize: 13,
             color: Colors.grey[600],
             fontWeight: FontWeight.w500,
+            fontFamily: 'InriaSans',
           ),
         ),
         Expanded(
           child: Text(
             value,
-            style: const TextStyle(fontSize: 14, color: Color(0xFF2F2F2F)),
+            style: const TextStyle(
+              fontSize: 13,
+              color: Color(0xFF2F2F2F),
+              fontWeight: FontWeight.w600,
+              fontFamily: 'InriaSans',
+            ),
           ),
         ),
       ],
@@ -178,24 +236,24 @@ class _SJTagihPageState extends State<SJTagihPage> {
 
     switch (status) {
       case 'Dikirim':
-        backgroundColor = Colors.blue[100]!;
-        textColor = Colors.blue[800]!;
+        backgroundColor = Colors.blue[50]!;
+        textColor = Colors.blue[700]!;
         break;
       case 'Tertagih':
-        backgroundColor = Colors.green[100]!;
-        textColor = Colors.green[800]!;
+        backgroundColor = Colors.green[50]!;
+        textColor = Colors.green[700]!;
         break;
       case 'Dalam Proses':
-        backgroundColor = Colors.orange[100]!;
-        textColor = Colors.orange[800]!;
+        backgroundColor = Colors.orange[50]!;
+        textColor = Colors.orange[700]!;
         break;
       case 'Belum Tertagih':
-        backgroundColor = Colors.red[100]!;
-        textColor = Colors.red[800]!;
+        backgroundColor = Colors.red[50]!;
+        textColor = Colors.red[700]!;
         break;
       default:
         backgroundColor = Colors.grey[100]!;
-        textColor = Colors.grey[800]!;
+        textColor = Colors.grey[700]!;
     }
 
     return Container(
@@ -208,8 +266,9 @@ class _SJTagihPageState extends State<SJTagihPage> {
         status,
         style: TextStyle(
           color: textColor,
-          fontSize: 12,
+          fontSize: 11,
           fontWeight: FontWeight.bold,
+          fontFamily: 'InriaSans',
         ),
       ),
     );
@@ -238,47 +297,76 @@ class _DetailDialogState extends State<DetailDialog> {
         });
       }
     } catch (e) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Error: $e')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Row(
+            children: [
+              const Icon(Icons.error_outline, color: Colors.white),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  'Error: $e',
+                  style: const TextStyle(fontFamily: 'InriaSans'),
+                ),
+              ),
+            ],
+          ),
+          backgroundColor: Colors.red.shade600,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+        ),
+      );
     }
   }
 
   void _showImageSourceDialog() {
     showModalBottomSheet(
       context: context,
+      backgroundColor: Colors.white,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
       builder: (BuildContext context) {
         return SafeArea(
           child: Padding(
-            padding: const EdgeInsets.all(20),
+            padding: const EdgeInsets.all(24),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Text(
-                  'Upload Tanda Tangan',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                Container(
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade300,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
                 ),
                 const SizedBox(height: 20),
-                ListTile(
-                  leading: const Icon(
-                    Icons.camera_alt,
-                    color: Color(0xFF2F2F2F),
+                const Text(
+                  'Upload Tanda Tangan',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    fontFamily: 'InriaSans',
                   ),
-                  title: const Text('Ambil Foto'),
+                ),
+                const SizedBox(height: 24),
+                _buildBottomSheetOption(
+                  icon: Icons.camera_alt_rounded,
+                  title: 'Ambil Foto',
+                  subtitle: 'Gunakan kamera',
                   onTap: () {
                     Navigator.pop(context);
                     _pickImage(ImageSource.camera);
                   },
                 ),
-                ListTile(
-                  leading: const Icon(
-                    Icons.photo_library,
-                    color: Color(0xFF2F2F2F),
-                  ),
-                  title: const Text('Pilih dari Galeri'),
+                const SizedBox(height: 12),
+                _buildBottomSheetOption(
+                  icon: Icons.photo_library_rounded,
+                  title: 'Pilih dari Galeri',
+                  subtitle: 'Pilih gambar yang ada',
                   onTap: () {
                     Navigator.pop(context);
                     _pickImage(ImageSource.gallery);
@@ -292,10 +380,189 @@ class _DetailDialogState extends State<DetailDialog> {
     );
   }
 
+  Widget _buildBottomSheetOption({
+    required IconData icon,
+    required String title,
+    required String subtitle,
+    required VoidCallback onTap,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.grey.shade50,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: Colors.grey.shade200),
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: const Color(0xFF2F2F2F),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Icon(icon, color: Colors.white, size: 24),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: const TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w600,
+                      fontFamily: 'InriaSans',
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    subtitle,
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Colors.grey.shade600,
+                      fontFamily: 'InriaSans',
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Icon(
+              Icons.arrow_forward_ios_rounded,
+              size: 16,
+              color: Colors.grey.shade400,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _handleApprove() {
+    // Validasi tanda tangan
+    if (_signatureImage == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Row(
+            children: const [
+              Icon(Icons.warning_amber_rounded, color: Colors.white),
+              SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  'Mohon upload tanda tangan terlebih dahulu',
+                  style: TextStyle(fontFamily: 'InriaSans'),
+                ),
+              ),
+            ],
+          ),
+          backgroundColor: Colors.orange.shade600,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+          margin: const EdgeInsets.all(16),
+          duration: const Duration(seconds: 3),
+        ),
+      );
+      return;
+    }
+
+    // Tampilkan loading dialog
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => const Center(
+        child: CircularProgressIndicator(color: Color(0xFF2F2F2F)),
+      ),
+    );
+
+    // Simulasi proses approve
+    Future.delayed(const Duration(seconds: 2), () {
+      // Tutup loading dialog
+      Navigator.pop(context);
+
+      // Tampilkan success notification
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.green.shade50,
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  Icons.check_circle_rounded,
+                  color: Colors.green.shade600,
+                  size: 56,
+                ),
+              ),
+              const SizedBox(height: 20),
+              const Text(
+                "Berhasil!",
+                style: TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                  fontFamily: 'InriaSans',
+                ),
+              ),
+              const SizedBox(height: 10),
+              Text(
+                "Surat jalan berhasil di-approve dan tersimpan",
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 14,
+                  color: Colors.grey.shade600,
+                  fontFamily: 'InriaSans',
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: () {
+                  Navigator.pop(context); // Tutup success dialog
+                  Navigator.pop(context); // Tutup detail dialog
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF2F2F2F),
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                child: const Text(
+                  "OK",
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontFamily: 'InriaSans',
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Dialog(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       child: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(24),
@@ -312,15 +579,25 @@ class _DetailDialogState extends State<DetailDialog> {
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
                       color: Color(0xFF2F2F2F),
+                      fontFamily: 'InriaSans',
                     ),
                   ),
                   IconButton(
-                    icon: const Icon(Icons.close),
+                    icon: const Icon(Icons.close_rounded),
                     onPressed: () => Navigator.pop(context),
+                    color: Colors.grey.shade600,
                   ),
                 ],
               ),
-              const Divider(height: 24),
+              const SizedBox(height: 8),
+              Container(
+                height: 3,
+                decoration: BoxDecoration(
+                  color: const Color(0xFF2F2F2F),
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              const SizedBox(height: 20),
               _buildDetailRow('No SJ', widget.suratJalan.noSJ),
               _buildDetailRow(
                 'Tanggal',
@@ -337,6 +614,7 @@ class _DetailDialogState extends State<DetailDialog> {
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
                   color: Color(0xFF2F2F2F),
+                  fontFamily: 'InriaSans',
                 ),
               ),
               const SizedBox(height: 12),
@@ -344,9 +622,9 @@ class _DetailDialogState extends State<DetailDialog> {
                 width: double.infinity,
                 height: 200,
                 decoration: BoxDecoration(
-                  border: Border.all(color: Colors.grey[300]!),
                   borderRadius: BorderRadius.circular(12),
-                  color: Colors.grey[50],
+                  color: Colors.grey.shade50,
+                  border: Border.all(color: Colors.grey.shade300, width: 2),
                 ),
                 child: _signatureImage != null
                     ? ClipRRect(
@@ -360,13 +638,18 @@ class _DetailDialogState extends State<DetailDialog> {
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Icon(Icons.draw, size: 48, color: Colors.grey[400]),
-                            const SizedBox(height: 8),
+                            Icon(
+                              Icons.draw_rounded,
+                              size: 48,
+                              color: Colors.grey[400],
+                            ),
+                            const SizedBox(height: 12),
                             Text(
                               'Belum ada tanda tangan',
                               style: TextStyle(
                                 color: Colors.grey[600],
                                 fontSize: 14,
+                                fontFamily: 'InriaSans',
                               ),
                             ),
                           ],
@@ -379,14 +662,20 @@ class _DetailDialogState extends State<DetailDialog> {
                   Expanded(
                     child: OutlinedButton.icon(
                       onPressed: _showImageSourceDialog,
-                      icon: const Icon(Icons.upload_file),
-                      label: const Text('Upload TTD'),
+                      icon: const Icon(Icons.upload_file_rounded, size: 18),
+                      label: Text(
+                        _signatureImage == null ? 'Upload TTD' : 'Ganti TTD',
+                        style: const TextStyle(fontFamily: 'InriaSans'),
+                      ),
                       style: OutlinedButton.styleFrom(
                         foregroundColor: const Color(0xFF2F2F2F),
-                        side: const BorderSide(color: Color(0xFF2F2F2F)),
-                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        side: const BorderSide(
+                          color: Color(0xFF2F2F2F),
+                          width: 1.5,
+                        ),
+                        padding: const EdgeInsets.symmetric(vertical: 14),
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
+                          borderRadius: BorderRadius.circular(12),
                         ),
                       ),
                     ),
@@ -401,46 +690,42 @@ class _DetailDialogState extends State<DetailDialog> {
                       },
                       style: OutlinedButton.styleFrom(
                         foregroundColor: Colors.red,
-                        side: const BorderSide(color: Colors.red),
+                        side: const BorderSide(color: Colors.red, width: 1.5),
                         padding: const EdgeInsets.symmetric(
-                          vertical: 12,
+                          vertical: 14,
                           horizontal: 16,
                         ),
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
+                          borderRadius: BorderRadius.circular(12),
                         ),
                       ),
-                      child: const Icon(Icons.delete),
+                      child: const Icon(Icons.delete_rounded, size: 20),
                     ),
                   ],
                 ],
               ),
-              const SizedBox(height: 16),
-              ElevatedButton(
-                onPressed: () {
-                  // Handle save action
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Surat jalan berhasil disimpan!'),
-                      backgroundColor: Colors.green,
+              const SizedBox(height: 20),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  onPressed: _handleApprove,
+                  icon: const Icon(Icons.check_circle_rounded, size: 20),
+                  label: const Text(
+                    'Approve',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      fontFamily: 'InriaSans',
                     ),
-                  );
-                  Navigator.pop(context);
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF2F2F2F),
-                  foregroundColor: Colors.white,
-                  minimumSize: const Size(double.infinity, 48),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
                   ),
-                ),
-                child: const Text(
-                  'Approve',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    fontFamily: 'InriaSans',
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF2F2F2F),
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
                   ),
                 ),
               ),
@@ -452,30 +737,38 @@ class _DetailDialogState extends State<DetailDialog> {
   }
 
   Widget _buildDetailRow(String label, String value) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Colors.grey.shade50,
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: Colors.grey.shade200),
+      ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           SizedBox(
-            width: 100,
+            width: 90,
             child: Text(
               label,
               style: TextStyle(
-                fontSize: 14,
+                fontSize: 13,
                 color: Colors.grey[600],
-                fontWeight: FontWeight.w500,
+                fontWeight: FontWeight.w600,
+                fontFamily: 'InriaSans',
               ),
             ),
           ),
-          const Text(': '),
+          const Text(': ', style: TextStyle(fontWeight: FontWeight.bold)),
           Expanded(
             child: Text(
               value,
               style: const TextStyle(
-                fontSize: 14,
+                fontSize: 13,
                 color: Color(0xFF2F2F2F),
                 fontWeight: FontWeight.w600,
+                fontFamily: 'InriaSans',
               ),
             ),
           ),

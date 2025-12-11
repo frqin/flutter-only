@@ -73,6 +73,123 @@ class _SJUmumPageState extends State<SJUmumPage> {
     );
   }
 
+  // Fungsi untuk handle approve
+  void _handleApprove() {
+    // Validasi tanda tangan
+    if (_ttdImage == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Row(
+            children: const [
+              Icon(LucideIcons.alertCircle, color: Colors.white),
+              SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  "Mohon upload tanda tangan terlebih dahulu",
+                  style: TextStyle(fontFamily: 'InriaSans'),
+                ),
+              ),
+            ],
+          ),
+          backgroundColor: Colors.red.shade600,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+          duration: const Duration(seconds: 3),
+        ),
+      );
+      return;
+    }
+
+    // Tampilkan loading dialog
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => const Center(
+        child: CircularProgressIndicator(color: Color(0xFF2F2F2F)),
+      ),
+    );
+
+    // Simulasi proses approve
+    Future.delayed(const Duration(seconds: 2), () {
+      // Tutup loading dialog
+      Navigator.pop(context);
+
+      // Tampilkan success notification
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.green.shade50,
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  LucideIcons.checkCircle2,
+                  color: Colors.green.shade600,
+                  size: 48,
+                ),
+              ),
+              const SizedBox(height: 20),
+              const Text(
+                "Berhasil!",
+                style: TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                  fontFamily: 'InriaSans',
+                ),
+              ),
+              const SizedBox(height: 10),
+              Text(
+                "Surat Jalan telah berhasil di-approve",
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 14,
+                  color: Colors.grey.shade600,
+                  fontFamily: 'InriaSans',
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: () {
+                  Navigator.pop(context); // Tutup dialog
+                  Navigator.pop(context); // Kembali ke halaman sebelumnya
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF2F2F2F),
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                child: const Text(
+                  "OK",
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontFamily: 'InriaSans',
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -213,7 +330,7 @@ class _SJUmumPageState extends State<SJUmumPage> {
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed: () {},
+                  onPressed: _handleApprove,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF2F2F2F),
                     padding: const EdgeInsets.symmetric(vertical: 16),

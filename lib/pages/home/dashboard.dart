@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:ekspedisi/pages/riwayat/riwayat_page.dart';
 import 'package:ekspedisi/pages/ekspedisi/dashboard_ekspedisi.dart';
 import 'package:lucide_icons/lucide_icons.dart';
+import 'package:ekspedisi/services/dashboard_service.dart';
 
 class DashboardPage extends StatelessWidget {
   const DashboardPage({Key? key}) : super(key: key);
@@ -51,109 +52,86 @@ class DashboardPage extends StatelessWidget {
 
             // Main Content
             Expanded(
-              child: Container(
-                width: double.infinity,
-                decoration: const BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(30),
-                    topRight: Radius.circular(30),
-                  ),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Padding(
-                      padding: EdgeInsets.fromLTRB(24, 24, 24, 16),
-                      child: Text(
-                        'Perlu Disetujui',
-                        style: TextStyle(
-                          fontFamily: 'InriaSans',
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black,
-                        ),
-                      ),
-                    ),
-                    // List akan diisi dari backend
-                    Expanded(
-                      child: ListView.builder(
-                        padding: const EdgeInsets.symmetric(horizontal: 20),
-                        itemCount: 5, // contoh 5 item
-                        itemBuilder: (context, index) {
-                          return GestureDetector(
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) =>
-                                      const DetailApprovePage(),
-                                ),
-                              );
-                              // aksi ketika diklik
-                            },
-                            child: Padding(
-                              padding: const EdgeInsets.only(bottom: 20),
-                              child: Row(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  // ICON KIRI (Lucide)
-                                  const Icon(
-                                    LucideIcons.send,
-                                    size: 38,
-                                    color: Colors.black87,
-                                  ),
-
-                                  const SizedBox(width: 16),
-
-                                  // TEKS TENGAH
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          'Ekspedisi ${index + 1} (WG-01 TMP)',
-                                          style: const TextStyle(
-                                            fontSize: 15,
-                                            fontWeight: FontWeight.bold,
-                                            fontFamily: 'InriaSans',
-                                          ),
-                                        ),
-                                        const SizedBox(height: 4),
-                                        const Text(
-                                          '12.03 PM - 06 NOVEMBER 2025',
-                                          style: TextStyle(
-                                            fontSize: 12,
-                                            color: Colors.grey,
-                                            fontFamily: 'InriaSans',
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-
-                                  // TEKS KANAN
-                                  const Padding(
-                                    padding: EdgeInsets.only(top: 6),
-                                    child: Text(
-                                      'Klik untuk melanjutkan',
-                                      style: TextStyle(
-                                        fontSize: 11,
-                                        color: Colors.grey,
-                                        fontFamily: 'InriaSans',
-                                      ),
-                                    ),
-                                  ),
-                                ],
+              child: FutureBuilder<List<ApprovalItem>>(
+                future: DashboardService.getApprovalList(),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(child: CircularProgressIndicator());
+                  } else if (snapshot.hasError) {
+                    return Center(child: Text('Error: ${snapshot.error}'));
+                  } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                    return const Center(child: Text('Tidak ada data'));
+                  } else {
+                    final items = snapshot.data!;
+                    return ListView.builder(
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      itemCount: items.length,
+                      itemBuilder: (context, index) {
+                        final item = items[index];
+                        return GestureDetector(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const DetailApprovePage(),
                               ),
+                            );
+                          },
+                          child: Padding(
+                            padding: const EdgeInsets.only(bottom: 20),
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Icon(
+                                  LucideIcons.send,
+                                  size: 38,
+                                  color: Colors.black87,
+                                ),
+                                const SizedBox(width: 16),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        item.title,
+                                        style: const TextStyle(
+                                          fontSize: 15,
+                                          fontWeight: FontWeight.bold,
+                                          fontFamily: 'InriaSans',
+                                        ),
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        item.date,
+                                        style: const TextStyle(
+                                          fontSize: 12,
+                                          color: Colors.grey,
+                                          fontFamily: 'InriaSans',
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                const Padding(
+                                  padding: EdgeInsets.only(top: 6),
+                                  child: Text(
+                                    'Klik untuk melanjutkan',
+                                    style: TextStyle(
+                                      fontSize: 11,
+                                      color: Colors.grey,
+                                      fontFamily: 'InriaSans',
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
-                          );
-                        },
-                      ),
-                    ),
-                  ],
-                ),
+                          ),
+                        );
+                      },
+                    );
+                  }
+                },
               ),
             ),
           ],
