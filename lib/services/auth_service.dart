@@ -3,7 +3,7 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 class AuthService {
-  final String baseUrl = "http://192.168.3.3:8000/api"; // Backend API
+  final String baseUrl = "http://127.0.0.1:8000/api"; // Desktop/Web → localhost
 
   // =====================
   // LOGIN OWNER
@@ -12,18 +12,20 @@ class AuthService {
     try {
       final url = Uri.parse("$baseUrl/auth/owner/login");
 
-      final response = await http.post(
-        url,
-        headers: {
-          "Content-Type": "application/json",
-          "Accept": "application/json",
-        },
-        body: jsonEncode({
-          "email": email,
-          "password": password,
-          "device": "flutter-app",
-        }),
-      ).timeout(const Duration(seconds: 10));
+      final response = await http
+          .post(
+            url,
+            headers: {
+              "Content-Type": "application/json",
+              "Accept": "application/json",
+            },
+            body: jsonEncode({
+              "email": email,
+              "password": password,
+              "device": "flutter-app",
+            }),
+          )
+          .timeout(const Duration(seconds: 10));
 
       final data = jsonDecode(response.body);
 
@@ -55,13 +57,15 @@ class AuthService {
 
       final url = Uri.parse("$baseUrl/auth/me");
 
-      final response = await http.get(
-        url,
-        headers: {
-          "Authorization": "Bearer $token",
-          "Accept": "application/json"
-        },
-      ).timeout(const Duration(seconds: 10));
+      final response = await http
+          .get(
+            url,
+            headers: {
+              "Authorization": "Bearer $token",
+              "Accept": "application/json",
+            },
+          )
+          .timeout(const Duration(seconds: 10));
 
       return jsonDecode(response.body);
     } catch (e) {
@@ -80,13 +84,15 @@ class AuthService {
       if (token != null) {
         final url = Uri.parse("$baseUrl/auth/logout");
 
-        await http.post(
-          url,
-          headers: {
-            "Authorization": "Bearer $token",
-            "Accept": "application/json"
-          },
-        ).timeout(const Duration(seconds: 10));
+        await http
+            .post(
+              url,
+              headers: {
+                "Authorization": "Bearer $token",
+                "Accept": "application/json",
+              },
+            )
+            .timeout(const Duration(seconds: 10));
       }
 
       prefs.remove("token");
