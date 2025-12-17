@@ -7,8 +7,46 @@ import 'package:ekspedisi/pages/ekspedisi/dashboard_ekspedisi.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:ekspedisi/services/dashboard_service.dart';
 
-class DashboardPage extends StatelessWidget {
-  const DashboardPage({Key? key}) : super(key: key);
+class DashboardPage extends StatefulWidget {
+  final String token; // token dari login
+  const DashboardPage({Key? key, required this.token}) : super(key: key);
+
+  @override
+  State<DashboardPage> createState() => _DashboardPageState();
+}
+
+class _DashboardPageState extends State<DashboardPage> {
+  final DashboardService dashboardService = DashboardService();
+  List approvals = [];
+  bool loading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    loadDashboard();
+  }
+
+  Future<void> loadDashboard() async {
+    try {
+      final data = await dashboardService.fetchDashboard(widget.token);
+      setState(() {
+        // mapping dummy untuk list sesuai totalApprovals
+        approvals = List.generate(
+          data['data']['totalApprovals'],
+          (index) => {
+            'title': 'Ekspedisi ${index + 1} (WG-01 TMP)',
+            'time': '12.03 PM - 06 NOVEMBER 2025',
+          },
+        );
+        loading = false;
+      });
+    } catch (e) {
+      setState(() {
+        loading = false;
+      });
+      print("Error fetch dashboard: $e");
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -52,86 +90,108 @@ class DashboardPage extends StatelessWidget {
 
             // Main Content
             Expanded(
-              child: FutureBuilder<List<ApprovalItem>>(
-                future: DashboardService.getApprovalList(),
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const Center(child: CircularProgressIndicator());
-                  } else if (snapshot.hasError) {
-                    return Center(child: Text('Error: ${snapshot.error}'));
-                  } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                    return const Center(child: Text('Tidak ada data'));
-                  } else {
-                    final items = snapshot.data!;
-                    return ListView.builder(
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
-                      itemCount: items.length,
-                      itemBuilder: (context, index) {
-                        final item = items[index];
-                        return GestureDetector(
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => const DetailApprovePage(),
+              child: Container(
+                width: double.infinity,
+                decoration: const BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(30),
+                    topRight: Radius.circular(30),
+                  ),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Padding(
+                      padding: EdgeInsets.fromLTRB(24, 24, 24, 16),
+                      child: Text(
+                        'Perlu Disetujui',
+                        style: TextStyle(
+                          fontFamily: 'InriaSans',
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black,
+                        ),
+                      ),
+                    ),
+                    // List akan diisi dari backend
+                    Expanded(
+                      child: loading
+                          ? const Center(child: CircularProgressIndicator())
+                          : ListView.builder(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 20,
                               ),
-                            );
-                          },
-                          child: Padding(
-                            padding: const EdgeInsets.only(bottom: 20),
-                            child: Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                const Icon(
-                                  LucideIcons.send,
-                                  size: 38,
-                                  color: Colors.black87,
-                                ),
-                                const SizedBox(width: 16),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        item.title,
-                                        style: const TextStyle(
-                                          fontSize: 15,
-                                          fontWeight: FontWeight.bold,
-                                          fontFamily: 'InriaSans',
-                                        ),
+                              itemCount: approvals.length,
+                              itemBuilder: (context, index) {
+                                final item = approvals[index];
+                                return GestureDetector(
+                                  onTap: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) =>
+                                            const DetailApprovePage(),
                                       ),
-                                      const SizedBox(height: 4),
-                                      Text(
-                                        item.date,
-                                        style: const TextStyle(
-                                          fontSize: 12,
-                                          color: Colors.grey,
-                                          fontFamily: 'InriaSans',
+                                    );
+                                  },
+                                  child: Padding(
+                                    padding: const EdgeInsets.only(bottom: 20),
+                                    child: Row(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        const Icon(
+                                          LucideIcons.send,
+                                          size: 38,
+                                          color: Colors.black87,
                                         ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                const Padding(
-                                  padding: EdgeInsets.only(top: 6),
-                                  child: Text(
-                                    'Klik untuk melanjutkan',
-                                    style: TextStyle(
-                                      fontSize: 11,
-                                      color: Colors.grey,
-                                      fontFamily: 'InriaSans',
+                                        const SizedBox(width: 16),
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                item['title'],
+                                                style: const TextStyle(
+                                                  fontSize: 15,
+                                                  fontWeight: FontWeight.bold,
+                                                  fontFamily: 'InriaSans',
+                                                ),
+                                              ),
+                                              const SizedBox(height: 4),
+                                              Text(
+                                                item['time'],
+                                                style: const TextStyle(
+                                                  fontSize: 12,
+                                                  color: Colors.grey,
+                                                  fontFamily: 'InriaSans',
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                        const Padding(
+                                          padding: EdgeInsets.only(top: 6),
+                                          child: Text(
+                                            'Klik untuk melanjutkan',
+                                            style: TextStyle(
+                                              fontSize: 11,
+                                              color: Colors.grey,
+                                              fontFamily: 'InriaSans',
+                                            ),
+                                          ),
+                                        ),
+                                      ],
                                     ),
                                   ),
-                                ),
-                              ],
+                                );
+                              },
                             ),
-                          ),
-                        );
-                      },
-                    );
-                  }
-                },
+                    ),
+                  ],
+                ),
               ),
             ),
           ],
