@@ -6,6 +6,7 @@ import 'package:ekspedisi/pages/riwayat/riwayat_page.dart';
 import 'package:ekspedisi/pages/ekspedisi/dashboard_ekspedisi.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:ekspedisi/services/dashboard_service.dart';
+import 'package:ekspedisi/pages/home/digital_clock_widget.dart';
 
 class DashboardPage extends StatefulWidget {
   final String token; // token dari login
@@ -65,24 +66,33 @@ class _DashboardPageState extends State<DashboardPage> {
                     backgroundImage: AssetImage('assets/images/profile.jpg'),
                   ),
                   const SizedBox(width: 16),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: const [
-                      Text(
-                        'Hai, Admin',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontFamily: 'InriaSans',
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: const [
+                        Text(
+                          'Hai, Admin',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontFamily: 'InriaSans',
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
-                      ),
-                      SizedBox(height: 2),
-                      Text(
-                        'Jelajahi halaman dashboard',
-                        style: TextStyle(color: Colors.grey, fontSize: 13),
-                      ),
-                    ],
+                        SizedBox(height: 2),
+                        Text(
+                          'Jelajahi halaman dashboard',
+                          style: TextStyle(color: Colors.grey, fontSize: 13),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  // Digital Clock
+                  const DigitalClockWidget(
+                    textColor: Colors.white,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
                   ),
                 ],
               ),

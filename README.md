@@ -6,6 +6,14 @@ GET http://localhost:3000/api/profile
 PUT http://localhost:3000/api/profile (update profile)
 POST http://localhost:3000/api/profile/photo (poto profil)
 PUT http://localhost:3000/api/profile/password (password)
+GET http://localhost:3000/api/surat-jalan-tagih
+GET http://localhost:3000/api/surat-jalan-tagih?jenis=tagih
+GET http://localhost:3000/api/scrap
+PUT http://localhost:3000/api/scrap/:id (edit)
+DELETE http://localhost:3000/api/scrap/:id (hapus)
+
+
+
 
 
 
@@ -14,7 +22,7 @@ PUT http://localhost:3000/api/profile/password (password)
 
 ## login
 - pt.nikatsu@pt.com
-- pt.nikatsu-bandung
+- pt.nikatsu
 
 
 
