@@ -1,16 +1,5 @@
-## api
-
-POST http://localhost:3000/api/auth/login (token)
-GET http://localhost:3000/api/dashboard
-GET http://localhost:3000/api/profile 
-PUT http://localhost:3000/api/profile (update profile)
-POST http://localhost:3000/api/profile/photo (poto profil)
-PUT http://localhost:3000/api/profile/password (password)
-GET http://localhost:3000/api/surat-jalan-tagih
-GET http://localhost:3000/api/surat-jalan-tagih?jenis=tagih
-GET http://localhost:3000/api/scrap
-PUT http://localhost:3000/api/scrap/:id (edit)
-DELETE http://localhost:3000/api/scrap/:id (hapus)
+## Prototype link
+https://www.figma.com/proto/zQ82zgniA2N2AdpRKJmZQe/ekspedisi?node-id=0-1&t=KKAWJ9MpqkkBUT9L-1
 
 
 
@@ -20,20 +9,8 @@ DELETE http://localhost:3000/api/scrap/:id (hapus)
 
 
 
-## login
-- pt.nikatsu@pt.com
-- pt.nikatsu
 
 
 
-## HASH
-$2b$10$LWPMTIToP9VqXAKyxCyzJuypuVY9SCiCQPRQBj.O.5lOX14HgbjrW
 
 
-## respon login token
-
-"message": "Login berhasil BOS!",
-    "SESUAIKAN TOKEN",
-    "user": {
-        "id": 4,
-        "name": "Atasan",
