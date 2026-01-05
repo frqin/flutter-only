@@ -1,5 +1,9 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
+import 'package:http/http.dart' as http;
+import 'package:path_provider/path_provider.dart';
+import 'package:open_file/open_file.dart';
 
 class DetailInvoicePage extends StatelessWidget {
   final String no;
@@ -21,6 +25,41 @@ class DetailInvoicePage extends StatelessWidget {
     required this.total,
   });
 
+  // ================= DOWNLOAD FUNCTION =================
+  Future<void> downloadInvoice(BuildContext context) async {
+    try {
+      const token =
+          "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6OCwicm9sZSI6Im93bmVyIiwiaWF0IjoxNzY3NjA0NDY2LCJleHAiOjE3Njc2OTA4NjZ9.UyxzrIz7J50Z78lz4Q5_H-4xk8GPhU3u15KJPJybdcg"; // 🔴 ganti token login
+
+      final url = Uri.parse(
+        "http://localhost:3000/api/invoice/download?no_invoice=$no",
+      );
+
+      final response = await http.get(
+        url,
+        headers: {"Authorization": "Bearer $token"},
+      );
+
+      if (response.statusCode == 200) {
+        final dir = await getApplicationDocumentsDirectory();
+        final file = File("${dir.path}/$no.pdf");
+
+        await file.writeAsBytes(response.bodyBytes);
+
+        await OpenFile.open(file.path);
+      } else {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text("Gagal download invoice")));
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text("Error: $e")));
+    }
+  }
+  // ====================================================
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -31,7 +70,6 @@ class DetailInvoicePage extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Back button + Title
               Row(
                 children: [
                   GestureDetector(
@@ -52,7 +90,6 @@ class DetailInvoicePage extends StatelessWidget {
 
               const SizedBox(height: 25),
 
-              // Header: No invoice + status
               Container(
                 padding: const EdgeInsets.all(18),
                 decoration: BoxDecoration(
@@ -107,7 +144,6 @@ class DetailInvoicePage extends StatelessWidget {
 
               const SizedBox(height: 25),
 
-              // Card informasi kapal
               Container(
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
@@ -175,7 +211,6 @@ class DetailInvoicePage extends StatelessWidget {
 
               const SizedBox(height: 30),
 
-              // Total
               const Text(
                 "Total Invoice",
                 style: TextStyle(fontSize: 14, color: Colors.grey),
@@ -191,7 +226,6 @@ class DetailInvoicePage extends StatelessWidget {
 
               const SizedBox(height: 40),
 
-              // Button
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
@@ -204,7 +238,7 @@ class DetailInvoicePage extends StatelessWidget {
                     ),
                     elevation: 2,
                   ),
-                  onPressed: () {},
+                  onPressed: () => downloadInvoice(context),
                   child: const Text(
                     "Download Invoice",
                     style: TextStyle(fontSize: 17, fontFamily: 'InriaSans'),

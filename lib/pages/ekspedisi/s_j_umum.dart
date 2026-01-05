@@ -1,7 +1,11 @@
+import 'package:ekspedisi/models/sjumum.dart';
+import 'package:ekspedisi/services/sj_umum_service.dart';
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:intl/intl.dart';
 
 class SJUmumPage extends StatefulWidget {
   const SJUmumPage({super.key});
@@ -14,382 +18,138 @@ class _SJUmumPageState extends State<SJUmumPage> {
   File? _ttdImage;
   final ImagePicker _picker = ImagePicker();
 
-  final List<Map<String, dynamic>> barangList = [
-    {"nama": "Barang A", "qty": 2, "keterangan": ""},
-    {"nama": "Barang B", "qty": 1, "keterangan": ""},
-    {"nama": "Barang C", "qty": 5, "keterangan": ""},
-  ];
+  List<SjUmum> barangList = [];
+  bool isLoading = true;
 
-  // Fungsi untuk pilih gambar
-  Future<void> _pickImage(ImageSource source) async {
-    final XFile? pickedFile = await _picker.pickImage(source: source);
-    if (pickedFile != null) {
+  @override
+  void initState() {
+    super.initState();
+    loadSJUmum();
+  }
+
+  Future<String> getToken() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString("token") ?? "";
+  }
+
+  Future<void> loadSJUmum() async {
+    try {
+      final token = await getToken();
+      final data = await SjUmumService.fetchSJUmum(token);
+
       setState(() {
-        _ttdImage = File(pickedFile.path);
+        barangList = data.where((e) => e.noSj != null).toList();
+        isLoading = false;
+      });
+    } catch (e) {
+      debugPrint("ERROR SJ UMUM: $e");
+      setState(() {
+        isLoading = false;
       });
     }
-  }
-
-  // Dialog pilih sumber gambar
-  void _showImageSourceDialog() {
-    showModalBottomSheet(
-      context: context,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (context) => Container(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Text(
-              "Pilih Sumber Gambar",
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                fontFamily: 'InriaSans',
-              ),
-            ),
-            const SizedBox(height: 20),
-            ListTile(
-              leading: const Icon(LucideIcons.camera),
-              title: const Text("Kamera"),
-              onTap: () {
-                Navigator.pop(context);
-                _pickImage(ImageSource.camera);
-              },
-            ),
-            ListTile(
-              leading: const Icon(LucideIcons.image),
-              title: const Text("Galeri"),
-              onTap: () {
-                Navigator.pop(context);
-                _pickImage(ImageSource.gallery);
-              },
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  // Fungsi untuk handle approve
-  void _handleApprove() {
-    // Validasi tanda tangan
-    if (_ttdImage == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Row(
-            children: const [
-              Icon(LucideIcons.alertCircle, color: Colors.white),
-              SizedBox(width: 12),
-              Expanded(
-                child: Text(
-                  "Mohon upload tanda tangan terlebih dahulu",
-                  style: TextStyle(fontFamily: 'InriaSans'),
-                ),
-              ),
-            ],
-          ),
-          backgroundColor: Colors.red.shade600,
-          behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10),
-          ),
-          duration: const Duration(seconds: 3),
-        ),
-      );
-      return;
-    }
-
-    // Tampilkan loading dialog
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) => const Center(
-        child: CircularProgressIndicator(color: Color(0xFF2F2F2F)),
-      ),
-    );
-
-    // Simulasi proses approve
-    Future.delayed(const Duration(seconds: 2), () {
-      // Tutup loading dialog
-      Navigator.pop(context);
-
-      // Tampilkan success notification
-      showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
-          ),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Colors.green.shade50,
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  LucideIcons.checkCircle2,
-                  color: Colors.green.shade600,
-                  size: 48,
-                ),
-              ),
-              const SizedBox(height: 20),
-              const Text(
-                "Berhasil!",
-                style: TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold,
-                  fontFamily: 'InriaSans',
-                ),
-              ),
-              const SizedBox(height: 10),
-              Text(
-                "Surat Jalan telah berhasil di-approve",
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 14,
-                  color: Colors.grey.shade600,
-                  fontFamily: 'InriaSans',
-                ),
-              ),
-            ],
-          ),
-          actions: [
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: () {
-                  Navigator.pop(context); // Tutup dialog
-                  Navigator.pop(context); // Kembali ke halaman sebelumnya
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF2F2F2F),
-                  padding: const EdgeInsets.symmetric(vertical: 14),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-                child: const Text(
-                  "OK",
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                    fontFamily: 'InriaSans',
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
-      );
-    });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey.shade100,
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-          child: Column(
-            children: [
-              // ============================
-              // HEADER
-              // ============================
-              Row(
-                children: [
-                  InkWell(
-                    onTap: () => Navigator.pop(context),
-                    child: Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.15),
-                        shape: BoxShape.circle,
-                      ),
-                      child: const Icon(
-                        Icons.arrow_back,
-                        size: 20,
-                        color: Colors.black,
-                      ),
-                    ),
-                  ),
-                  const Spacer(),
-                  const Text(
-                    "Surat Jalan Umum",
-                    style: TextStyle(
-                      fontFamily: 'InriaSans',
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const Spacer(),
-                  const SizedBox(width: 40),
-                ],
-              ),
-              const SizedBox(height: 20),
+      backgroundColor: Colors.white,
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Color(0xFF2F2F2F)),
+          onPressed: () => Navigator.pop(context),
+        ),
 
-              // ============================
-              // FORM SURAT JALAN
-              // ============================
-              buildTitle("Form Surat Jalan"),
-              const SizedBox(height: 14),
-              buildSectionCard(
-                icon: LucideIcons.fileText,
-                title: "No Surat Jalan",
-                child: buildInput("Nomor Surat Jalan"),
-              ),
-              const SizedBox(height: 12),
-              buildSectionCard(
-                icon: LucideIcons.user,
-                title: "Penerima",
-                child: buildInput("Nama Penerima"),
-              ),
-              const SizedBox(height: 14),
-              buildSectionCard(
-                icon: LucideIcons.archive,
-                title: "Detail Barang",
-                child: buildBarangSection(),
-              ),
-              const SizedBox(height: 32),
-
-              // ============================
-              // TANDA TANGAN DIGITAL
-              // ============================
-              buildTitle("Tanda Tangan Digital"),
-              const SizedBox(height: 12),
-              Container(
-                height: 200,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(14),
-                  color: Colors.white,
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.06),
-                      blurRadius: 6,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
-                ),
-                child: _ttdImage == null
-                    ? Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              LucideIcons.upload,
-                              size: 48,
-                              color: Colors.grey.shade400,
-                            ),
-                            const SizedBox(height: 12),
-                            Text(
-                              "Belum ada tanda tangan",
-                              style: TextStyle(
-                                color: Colors.grey.shade600,
-                                fontSize: 14,
-                              ),
-                            ),
-                          ],
-                        ),
-                      )
-                    : ClipRRect(
-                        borderRadius: BorderRadius.circular(14),
-                        child: Image.file(_ttdImage!, fit: BoxFit.contain),
-                      ),
-              ),
-              const SizedBox(height: 8),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  if (_ttdImage != null)
-                    TextButton.icon(
-                      onPressed: () {
-                        setState(() {
-                          _ttdImage = null;
-                        });
-                      },
-                      icon: const Icon(LucideIcons.trash2, size: 16),
-                      label: const Text("Hapus"),
-                      style: TextButton.styleFrom(foregroundColor: Colors.red),
-                    ),
-                  TextButton.icon(
-                    onPressed: _showImageSourceDialog,
-                    icon: const Icon(LucideIcons.upload, size: 16),
-                    label: Text(_ttdImage == null ? "Upload TTD" : "Ganti TTD"),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 30),
-
-              // BUTTON
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: _handleApprove,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF2F2F2F),
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(14),
-                    ),
-                    elevation: 2,
-                  ),
-                  child: const Text(
-                    "Approve",
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 16,
-                      fontFamily: 'InriaSans',
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 100),
-            ],
+        title: const Text(
+          "Surat Jalan Umum",
+          style: TextStyle(
+            fontFamily: 'InriaSans',
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+            color: Color(0xFF2F2F2F),
           ),
         ),
+        centerTitle: true,
       ),
+      body: isLoading
+          ? const Center(
+              child: CircularProgressIndicator(
+                valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF2F2F2F)),
+              ),
+            )
+          : barangList.isEmpty
+          ? Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    LucideIcons.packageOpen,
+                    size: 64,
+                    color: Colors.grey.shade400,
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    "Tidak ada data",
+                    style: TextStyle(fontSize: 16, color: Colors.grey.shade600),
+                  ),
+                ],
+              ),
+            )
+          : RefreshIndicator(
+              onRefresh: loadSJUmum,
+              color: const Color(0xFF2F2F2F),
+              child: ListView.builder(
+                padding: const EdgeInsets.all(16),
+                itemCount: barangList.length,
+                itemBuilder: (context, index) {
+                  return buildSJCard(barangList[index]);
+                },
+              ),
+            ),
     );
   }
 
-  // ======================================================
-  // WIDGETS CUSTOM
-  // ======================================================
-  Widget buildTitle(String title) {
-    return Align(
-      alignment: Alignment.centerLeft,
-      child: Text(
-        title,
-        style: const TextStyle(
-          fontSize: 18,
-          fontWeight: FontWeight.bold,
-          fontFamily: "InriaSans",
-        ),
-      ),
-    );
-  }
+  Widget buildSJCard(SjUmum item) {
+    // Tracking status
+    String trackingStatus = "Draft";
+    Color statusColor = Colors.grey.shade600;
+    IconData statusIcon = LucideIcons.fileEdit;
 
-  Widget buildSectionCard({
-    required IconData icon,
-    required String title,
-    required Widget child,
-  }) {
+    final status = item.status.toLowerCase();
+    if (status.contains("kirim")) {
+      trackingStatus = "Dikirim";
+      statusColor = const Color(0xFFFFA726);
+      statusIcon = LucideIcons.truck;
+    } else if (status.contains("terima") || status.contains("disetujui")) {
+      trackingStatus = "Diterima";
+      statusColor = const Color(0xFF66BB6A);
+      statusIcon = LucideIcons.checkCircle;
+    } else if (status.contains("belum")) {
+      trackingStatus = "Draft";
+      statusColor = Colors.grey.shade600;
+      statusIcon = LucideIcons.fileEdit;
+    }
+
+    // Format tanggal
+    String formattedDate = "-";
+    try {
+      final date = DateTime.parse(item.tanggal);
+      formattedDate = DateFormat('dd MMM yyyy, HH:mm').format(date);
+    } catch (e) {
+      formattedDate = item.tanggal;
+    }
+
     return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(16),
+      margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.grey.shade300, width: 1),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.05),
-            blurRadius: 8,
+            blurRadius: 4,
             offset: const Offset(0, 2),
           ),
         ],
@@ -397,195 +157,173 @@ class _SJUmumPageState extends State<SJUmumPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              Icon(icon, size: 22),
-              const SizedBox(width: 10),
-              Text(
-                title,
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
+          // HEADER
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        item.noSj,
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFF2F2F2F),
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                      Row(
+                        children: [
+                          Icon(
+                            LucideIcons.clock,
+                            size: 14,
+                            color: Colors.grey.shade600,
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            formattedDate,
+                            style: TextStyle(
+                              fontSize: 13,
+                              color: Colors.grey.shade600,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-            ],
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 6,
+                  ),
+                  decoration: BoxDecoration(
+                    color: statusColor.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(statusIcon, size: 14, color: statusColor),
+                      const SizedBox(width: 6),
+                      Text(
+                        trackingStatus,
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          color: statusColor,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
-          const SizedBox(height: 14),
-          child,
+
+          Divider(height: 1, color: Colors.grey.shade300),
+
+          // INFO BARANG
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Icon(
+                      LucideIcons.package,
+                      size: 18,
+                      color: Colors.grey.shade700,
+                    ),
+                    const SizedBox(width: 8),
+                    const Text(
+                      "Info Barang",
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF2F2F2F),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                buildInfoRow("No. Baru", item.noBaru ?? "-"),
+                const SizedBox(height: 8),
+                buildInfoRow("Jenis", item.jenis),
+                const SizedBox(height: 8),
+                buildInfoRow("Keterangan", item.keterangan ?? "-"),
+                const SizedBox(height: 8),
+                buildInfoRow("No. Supplier", item.noSupp ?? "-"),
+              ],
+            ),
+          ),
+
+          Divider(height: 1, color: Colors.grey.shade300),
+
+          // PENGIRIMAN
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Icon(
+                      LucideIcons.truck,
+                      size: 18,
+                      color: Colors.grey.shade700,
+                    ),
+                    const SizedBox(width: 8),
+                    const Text(
+                      "Pengiriman",
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF2F2F2F),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                buildInfoRow("Ekspedisi", item.ekspedisi ?? "-"),
+                const SizedBox(height: 8),
+                buildInfoRow("User ID", item.userId),
+                const SizedBox(height: 8),
+                buildInfoRow("Status Lengkap", item.status),
+              ],
+            ),
+          ),
         ],
       ),
     );
   }
 
-  Widget buildInput(String hint) {
-    return TextField(
-      decoration: InputDecoration(
-        hintText: hint,
-        filled: true,
-        fillColor: Colors.grey.shade200,
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: 14,
-          vertical: 12,
-        ),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide.none,
-        ),
-      ),
-    );
-  }
-
-  Widget buildBarangSection() {
-    return Column(
+  Widget buildInfoRow(String label, String value) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // HEADER TABLE
-        Container(
-          padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
-          decoration: BoxDecoration(
-            color: const Color(0xFF2F2F2F),
-            borderRadius: BorderRadius.circular(10),
-          ),
-          child: Row(
-            children: [
-              SizedBox(
-                width: 30,
-                child: Text(
-                  "No",
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 13,
-                    color: Colors.white,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-              ),
-              Expanded(
-                flex: 3,
-                child: Text(
-                  "Nama Barang",
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 13,
-                    color: Colors.white,
-                  ),
-                ),
-              ),
-              SizedBox(
-                width: 90,
-                child: Text(
-                  "Jumlah",
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 13,
-                    color: Colors.white,
-                  ),
-                  textAlign: TextAlign.left,
-                ),
-              ),
-              Expanded(
-                flex: 3,
-                child: Text(
-                  "Keterangan",
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 13,
-                    color: Colors.white,
-                  ),
-                ),
-              ),
-            ],
+        SizedBox(
+          width: 110,
+          child: Text(
+            label,
+            style: TextStyle(fontSize: 13, color: Colors.grey.shade600),
           ),
         ),
-        const SizedBox(height: 8),
-
-        // ROWS
-        ...barangList.asMap().entries.map((entry) {
-          int index = entry.key;
-          Map<String, dynamic> b = entry.value;
-
-          return Container(
-            margin: const EdgeInsets.only(bottom: 8),
-            padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              color: Colors.grey.shade50,
-              borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: Colors.grey.shade300, width: 1),
+        Text(": ", style: TextStyle(fontSize: 13, color: Colors.grey.shade600)),
+        Expanded(
+          child: Text(
+            value,
+            style: const TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w500,
+              color: Color(0xFF2F2F2F),
             ),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // NO
-                SizedBox(
-                  width: 35,
-                  child: Text(
-                    "${index + 1}",
-                    style: const TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                ),
-
-                // NAMA BARANG
-                Expanded(
-                  flex: 3,
-                  child: Text(
-                    b['nama'],
-                    style: const TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
-
-                // JUMLAH
-                SizedBox(
-                  width: 70,
-                  child: Text(
-                    "${b['qty']}",
-                    style: const TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                    ),
-                    textAlign: TextAlign.left,
-                  ),
-                ),
-
-                // KETERANGAN (Input Field)
-                Expanded(
-                  flex: 3,
-                  child: TextField(
-                    decoration: InputDecoration(
-                      hintText: "Ket...",
-                      hintStyle: TextStyle(fontSize: 12),
-                      filled: true,
-                      fillColor: Colors.white,
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 8,
-                      ),
-                      border: OutlineInputBorder(
-                        borderSide: BorderSide(color: Colors.grey.shade300),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderSide: BorderSide(color: Colors.grey.shade300),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderSide: BorderSide(color: Color(0xFF2F2F2F)),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                    ),
-                    style: const TextStyle(fontSize: 13),
-                    onChanged: (v) => b['keterangan'] = v,
-                  ),
-                ),
-              ],
-            ),
-          );
-        }).toList(),
+          ),
+        ),
       ],
     );
   }

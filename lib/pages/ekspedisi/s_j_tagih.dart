@@ -1,7 +1,9 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:ekspedisi/models/SuratTagih.dart';
+import 'package:ekspedisi/models/sjtagih.dart';
+import 'package:ekspedisi/services/sj_tagih_service.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class SJTagihPage extends StatefulWidget {
   const SJTagihPage({Key? key}) : super(key: key);
@@ -11,48 +13,22 @@ class SJTagihPage extends StatefulWidget {
 }
 
 class _SJTagihPageState extends State<SJTagihPage> {
-  final List<SuratJalan> suratJalanList = [
-    SuratJalan(
-      noSJ: 'SJ-2024-001',
-      tanggal: DateTime(2024, 11, 20),
-      noOrder: 'ORD-001',
-      customer: 'PT Maju Jaya',
-      ekspedisi: 'JNE Regular',
-      status: 'Dikirim',
-    ),
-    SuratJalan(
-      noSJ: 'SJ-2025-002',
-      tanggal: DateTime(2024, 11, 21),
-      noOrder: 'ORD-002',
-      customer: 'CV Berkah Sejahtera',
-      ekspedisi: 'SiCepat Express',
-      status: 'Dalam Proses',
-    ),
-    SuratJalan(
-      noSJ: 'SJ-2025-003',
-      tanggal: DateTime(2024, 11, 22),
-      noOrder: 'ORD-003',
-      customer: 'PT Sukses Makmur',
-      ekspedisi: 'J&T Cargo',
-      status: 'Tertagih',
-    ),
-    SuratJalan(
-      noSJ: 'SJ-2025-004',
-      tanggal: DateTime(2024, 11, 23),
-      noOrder: 'ORD-004',
-      customer: 'Toko Sinar Terang',
-      ekspedisi: 'Anteraja',
-      status: 'Dikirim',
-    ),
-    SuratJalan(
-      noSJ: 'SJ-2025-005',
-      tanggal: DateTime(2024, 11, 24),
-      noOrder: 'ORD-005',
-      customer: 'UD Mandiri Jaya',
-      ekspedisi: 'JNE Express',
-      status: 'Belum Tertagih',
-    ),
-  ];
+  late Future<List<SuratJalan>> _suratJalanFuture;
+  String? token;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadToken();
+  }
+
+  Future<void> _loadToken() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      token = prefs.getString('token') ?? '';
+      _suratJalanFuture = SjTagihService.fetchSJTagih(token!);
+    });
+  }
 
   void _showDetailDialog(SuratJalan sj) {
     showDialog(
@@ -70,6 +46,7 @@ class _SJTagihPageState extends State<SJTagihPage> {
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
+        centerTitle: true,
         title: const Text(
           'Surat Jalan Tagih',
           style: TextStyle(
@@ -79,30 +56,49 @@ class _SJTagihPageState extends State<SJTagihPage> {
             fontFamily: 'InriaSans',
           ),
         ),
-        iconTheme: const IconThemeData(color: Color(0xFF2F2F2F)),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.search_rounded),
-            onPressed: () {},
-            tooltip: 'Cari',
-          ),
-          IconButton(
-            icon: const Icon(Icons.filter_list_rounded),
-            onPressed: () {},
-            tooltip: 'Filter',
-          ),
-        ],
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(1),
           child: Container(color: Colors.grey.shade200, height: 1),
         ),
       ),
-      body: ListView.builder(
-        padding: const EdgeInsets.all(16),
-        itemCount: suratJalanList.length,
-        itemBuilder: (context, index) {
-          final sj = suratJalanList[index];
-          return _buildSuratJalanCard(sj);
+      body: FutureBuilder<List<SuratJalan>>(
+        future: _suratJalanFuture,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          } else if (snapshot.hasError) {
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(Icons.error_outline, size: 48, color: Colors.grey),
+                  const SizedBox(height: 16),
+                  Text('Error: ${snapshot.error}'),
+                  const SizedBox(height: 16),
+                  ElevatedButton(
+                    onPressed: () {
+                      setState(() {
+                        _loadToken();
+                      });
+                    },
+                    child: const Text('Coba Lagi'),
+                  ),
+                ],
+              ),
+            );
+          } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+            return const Center(child: Text('Tidak ada data Surat Jalan'));
+          }
+
+          final suratJalanList = snapshot.data!;
+          return ListView.builder(
+            padding: const EdgeInsets.all(16),
+            itemCount: suratJalanList.length,
+            itemBuilder: (context, index) {
+              final sj = suratJalanList[index];
+              return _buildSuratJalanCard(sj);
+            },
+          );
         },
       ),
     );
@@ -173,7 +169,7 @@ class _SJTagihPageState extends State<SJTagihPage> {
                     'Lihat Detail & Upload TTD',
                     style: TextStyle(
                       fontFamily: 'InriaSans',
-                      fontWeight: FontWeight.w600,
+                      fontWeight: FontWeight.w300,
                     ),
                   ),
                   style: ElevatedButton.styleFrom(

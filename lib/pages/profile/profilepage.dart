@@ -68,33 +68,7 @@ class _ProfilPageState extends State<ProfilPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // BOTTOM NAV
-      bottomNavigationBar: Container(
-        padding: const EdgeInsets.symmetric(vertical: 6),
-        decoration: const BoxDecoration(
-          color: Colors.black87,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Transform.translate(
-              offset: const Offset(0, -38),
-              child: Container(
-                padding: const EdgeInsets.all(14),
-                decoration: const BoxDecoration(
-                  color: Colors.white,
-                  shape: BoxShape.circle,
-                ),
-                child: const Icon(LucideIcons.truck, size: 30),
-              ),
-            ),
-          ],
-        ),
-      ),
-
-      backgroundColor: Colors.white,
-
+      backgroundColor: const Color(0xFFF5F5F5),
       body: Stack(
         children: [
           // ===================== MAIN CONTENT =====================
@@ -104,75 +78,117 @@ class _ProfilPageState extends State<ProfilPage> {
                 // ===================== HEADER =====================
                 Container(
                   width: double.infinity,
-                  padding: const EdgeInsets.only(top: 80, bottom: 40),
+                  padding: const EdgeInsets.only(top: 60, bottom: 50),
                   decoration: const BoxDecoration(
-                    color: Color(0xFF2E2E2E),
+                    color: Color(0xFF1A1A1A),
                     borderRadius: BorderRadius.vertical(
-                      bottom: Radius.circular(60),
+                      bottom: Radius.circular(32),
                     ),
                   ),
                   child: Column(
                     children: [
-                      Text(
-                        _name,
-                        style: const TextStyle(
+                      const Text(
+                        'Profil',
+                        style: TextStyle(
                           color: Colors.white,
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
+                          fontSize: 26,
+                          fontWeight: FontWeight.w700,
+                          fontFamily: 'InriaSans',
+                        ),
+                      ),
+
+                      const SizedBox(height: 32),
+
+                      // FOTO PROFIL - Update berdasarkan _imagePath
+                      Container(
+                        padding: const EdgeInsets.all(4),
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          border: Border.all(color: Colors.white24, width: 2),
+                        ),
+                        child: CircleAvatar(
+                          radius: 52,
+                          backgroundImage: _imagePath != null
+                              ? FileImage(File(_imagePath!))
+                              : const AssetImage("assets/images/profile.jpg")
+                                    as ImageProvider,
                         ),
                       ),
 
                       const SizedBox(height: 20),
 
-                      // FOTO PROFIL - Update berdasarkan _imagePath
-                      CircleAvatar(
-                        radius: 55,
-                        backgroundImage: _imagePath != null
-                            ? FileImage(File(_imagePath!))
-                            : const AssetImage("assets/images/profile.jpg")
-                                  as ImageProvider,
+                      Text(
+                        _name,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 22,
+                          fontWeight: FontWeight.w700,
+                          fontFamily: 'InriaSans',
+                        ),
                       ),
 
-                      const SizedBox(height: 25),
+                      const SizedBox(height: 4),
+
+                      Text(
+                        _username.isNotEmpty
+                            ? '@$_username'
+                            : 'Username tidak diatur',
+                        style: const TextStyle(
+                          color: Color(0xFF9CA3AF),
+                          fontSize: 13,
+                          fontFamily: 'InriaSans',
+                        ),
+                      ),
                     ],
                   ),
                 ),
 
-                const SizedBox(height: 40),
+                const SizedBox(height: 32),
 
                 // =================== BOX EDIT PROFIL ===================
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
                   child: InkWell(
                     onTap: _goToEditProfile,
                     borderRadius: BorderRadius.circular(16),
                     child: Container(
                       padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 14,
+                        horizontal: 18,
+                        vertical: 16,
                       ),
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(16),
-                        border: Border.all(
-                          color: Colors.grey.shade300,
-                          width: 1,
-                        ),
+                        color: Colors.white,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.08),
+                            blurRadius: 12,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
                       ),
                       child: const Row(
                         children: [
                           Icon(
-                            LucideIcons.user,
+                            LucideIcons.edit2,
                             size: 20,
-                            color: Colors.black87,
+                            color: Color(0xFF1A1A1A),
                           ),
-                          SizedBox(width: 12),
+                          SizedBox(width: 14),
                           Text(
-                            "Edit profil",
+                            "Edit Profil",
                             style: TextStyle(
-                              fontSize: 15,
+                              fontSize: 16,
                               fontWeight: FontWeight.w600,
-                              color: Colors.black87,
+                              color: Color(0xFF1A1A1A),
+                              fontFamily: 'InriaSans',
                             ),
+                          ),
+                          Spacer(),
+                          Icon(
+                            Icons.arrow_forward_ios,
+                            size: 16,
+                            color: Color(0xFF9CA3AF),
                           ),
                         ],
                       ),
@@ -180,15 +196,67 @@ class _ProfilPageState extends State<ProfilPage> {
                   ),
                 ),
 
-                const SizedBox(height: 90),
+                const SizedBox(height: 40),
 
                 // WAKTU LOGIN REAL-TIME
-                Text(
-                  "Terakhir login: $_lastLogin",
-                  style: const TextStyle(color: Colors.grey, fontSize: 12),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(14),
+                      color: Colors.white,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.05),
+                          blurRadius: 8,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(10),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFF3F4F6),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: const Icon(
+                            LucideIcons.clock,
+                            size: 18,
+                            color: Color(0xFF1A1A1A),
+                          ),
+                        ),
+                        const SizedBox(width: 14),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              'Terakhir Login',
+                              style: TextStyle(
+                                color: Color(0xFF6B7280),
+                                fontSize: 12,
+                                fontFamily: 'InriaSans',
+                              ),
+                            ),
+                            Text(
+                              _lastLogin,
+                              style: const TextStyle(
+                                color: Color(0xFF1A1A1A),
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                                fontFamily: 'InriaSans',
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
 
-                const SizedBox(height: 120),
+                const SizedBox(height: 140),
               ],
             ),
           ),
