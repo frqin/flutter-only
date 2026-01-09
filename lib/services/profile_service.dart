@@ -1,85 +1,57 @@
 import 'dart:convert';
-import 'dart:io';
-
+import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:shared_preferences/shared_preferences.dart';
 
 class ProfileService {
-  static const String baseUrl = 'http://localhost:3000/api';
+  static const String _baseUrl = 'https://erp.pt-nikkatsu.com/api';
+  static const String _apiKey = 'beacukai12345';
 
-  // ambil token (hasil login)
-  static Future<String?> _getToken() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getString('token');
-  }
-
-  /// GET /api/profile
-  static Future<Map<String, dynamic>> getProfile() async {
-    final token = await _getToken();
-
+  // ================= GET PROFILE =================
+  Future<Map<String, dynamic>> getProfileByNrp(String nrp) async {
     final response = await http.get(
-      Uri.parse('$baseUrl/profile'),
-      headers: {'Authorization': 'Bearer $token'},
+      Uri.parse('$_baseUrl/users/$nrp'),
+      headers: {'API-KEY': _apiKey, 'Accept': 'application/json'},
     );
 
-    return jsonDecode(response.body);
+    if (response.statusCode != 200) {
+      throw Exception('Gagal ambil profile');
+    }
+
+    final decoded = jsonDecode(response.body);
+
+    if (decoded is List && decoded.isNotEmpty) {
+      return decoded[0];
+    }
+
+    throw Exception('Data profile kosong');
   }
 
-  /// PUT /api/profile
-  static Future<bool> updateProfile({
+  // ================= UPDATE PROFILE =================
+  Future<void> updateProfileByNrp({
+    required String nrp,
     required String name,
     required String email,
+    String? password,
   }) async {
-    final token = await _getToken();
-
-    final response = await http.put(
-      Uri.parse('$baseUrl/profile'),
+    final response = await http.post(
+      // ⚠️ kalau backend kamu pakai PUT, ganti http.post → http.put
+      Uri.parse('$_baseUrl/users/$nrp'),
       headers: {
-        'Authorization': 'Bearer $token',
-        'Content-Type': 'application/json',
-      },
-      body: jsonEncode({'name': name, 'email': email}),
-    );
-
-    return response.statusCode == 200;
-  }
-
-  /// POST /api/profile/photo
-  static Future<bool> uploadPhoto(File photo) async {
-    final token = await _getToken();
-
-    final request = http.MultipartRequest(
-      'POST',
-      Uri.parse('$baseUrl/profile/photo'),
-    );
-
-    request.headers['Authorization'] = 'Bearer $token';
-
-    request.files.add(await http.MultipartFile.fromPath('photo', photo.path));
-
-    final response = await request.send();
-    return response.statusCode == 200;
-  }
-
-  /// PUT /api/profile/password
-  static Future<bool> changePassword({
-    required String oldPassword,
-    required String newPassword,
-  }) async {
-    final token = await _getToken();
-
-    final response = await http.put(
-      Uri.parse('$baseUrl/profile/password'),
-      headers: {
-        'Authorization': 'Bearer $token',
+        'API-KEY': _apiKey,
+        'Accept': 'application/json',
         'Content-Type': 'application/json',
       },
       body: jsonEncode({
-        'oldPassword': oldPassword,
-        'newPassword': newPassword,
+        'namaPegawai': name,
+        'user_email': email,
+        if (password != null && password.isNotEmpty) 'user_password': password,
       }),
     );
 
-    return response.statusCode == 200;
+    debugPrint('UPDATE PROFILE RESPONSE: ${response.body}');
+
+    if (response.statusCode != 200) {
+      throw Exception('Gagal update profile');
+    }
   }
 }

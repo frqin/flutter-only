@@ -28,7 +28,10 @@ class MyApp extends StatelessWidget {
 
       routes: {
         '/sj-umum': (context) => const SJUmumPage(),
-        '/scrap': (context) => const ScrapPage(),
+        '/scrap': (context) => const ScrapPage(
+          token:
+              'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6OCwicm9sZSI6Im93bmVyIiwiaWF0IjoxNzY3NjcwNTkyLCJleHAiOjE3Njc3NTY5OTJ9.ct_gS07FyfM1kx0gBvKu08JUlioinYcms3wnB6wapzI',
+        ),
         '/sj-tagih': (context) => const SJTagihPage(),
         '/invoice-export': (context) => InvoiceEksporPage(),
       },

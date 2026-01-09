@@ -1,5 +1,5 @@
 ## Prototype link
-https://www.figma.com/proto/zQ82zgniA2N2AdpRKJmZQe/ekspedisi?node-id=0-1&t=KKAWJ9MpqkkBUT9L-1
+https://www.figma.com/proto/zQ82zgniA2N2AdpRKJmZQe/ekspedisi?node-id=0-1&t=VeO5h9YiHetiuyQk-1
 
 
 
@@ -16,12 +16,9 @@ https://www.figma.com/proto/zQ82zgniA2N2AdpRKJmZQe/ekspedisi?node-id=0-1&t=KKAWJ
 
 
 ## api
- http://localhost:3000/api/auth/register
- http://localhost:3000/api/auth/login (token)
- http://localhost:3000/api/sjtagih  
- http://localhost:3000/api/sjumum 
- http://localhost:3000/api/invoice 
- http://localhost:3000/api/invoice/download?no_invoice=H-25001 (download invoice)
+ https://erp.pt-nikkatsu.com/api/users
+ https://erp.pt-nikkatsu.com/api/users/nrp (profile)
+ https://erp.pt-nikkatsu.com/api/sjt - untuk cari no surat jalannya (https://erp.pt-nikkatsu.com/api/sjt/2025110006)
 
 
 
@@ -35,14 +32,8 @@ https://www.figma.com/proto/zQ82zgniA2N2AdpRKJmZQe/ekspedisi?node-id=0-1&t=KKAWJ
 
 ## login
   
-  "email": "nikatsu@pt.com",
-  "password": "123456",
- 
-
-  "email": "nikatsu@example.com",
-  "password": "owner1234
-
-
-
-
+pt nikatsu
+Password: nikkatsuapprove12345
+Denny Ilyas, ST, MBA
+Email: nikkatsu_approve@gmail.com
 

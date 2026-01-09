@@ -98,7 +98,7 @@ class _DashboardPageState extends State<DashboardPage> {
                                   child: const CircleAvatar(
                                     radius: 32,
                                     backgroundImage: AssetImage(
-                                      'assets/images/profile.jpg',
+                                      'assets/images/pegawai.png',
                                     ),
                                   ),
                                 ),

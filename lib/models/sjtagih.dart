@@ -1,33 +1,34 @@
-class SuratJalan {
-  final int? no;
-  final String noSJ;
-  final DateTime tanggal;
+class SjTagihModel {
+  final String no;
+  final String noSj;
   final String noOrder;
+  final DateTime tanggal;
   final String customer;
-  final String ekspedisi;
+  final String kota;
+  final String produk;
   final String status;
 
-  SuratJalan({
-    this.no,
-    required this.noSJ,
-    required this.tanggal,
+  SjTagihModel({
+    required this.no,
+    required this.noSj,
     required this.noOrder,
+    required this.tanggal,
     required this.customer,
-    required this.ekspedisi,
+    required this.kota,
+    required this.produk,
     required this.status,
   });
 
-  factory SuratJalan.fromJson(Map<String, dynamic> json) {
-    return SuratJalan(
-      no: json['no'] as int?,
-      noSJ: json['NoSj'] ?? '-',
-      tanggal: json['Tanggal'] != null
-          ? DateTime.parse(json['Tanggal'])
-          : DateTime.now(),
-      noOrder: json['NoOrder'] ?? '-',
-      customer: json['IdCustomer'] ?? '-',
-      ekspedisi: json['Ekspedisi'] ?? '-',
-      status: json['Status'] ?? '-',
+  factory SjTagihModel.fromJson(Map<String, dynamic> json) {
+    return SjTagihModel(
+      no: json['no'],
+      noSj: json['NoSj'],
+      noOrder: json['NoOrder'],
+      tanggal: DateTime.parse(json['Tanggal']),
+      customer: json['customer'],
+      kota: json['Kota'],
+      produk: json['Produk'],
+      status: json['Status'],
     );
   }
 }

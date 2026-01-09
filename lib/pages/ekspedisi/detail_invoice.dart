@@ -32,7 +32,7 @@ class DetailInvoicePage extends StatelessWidget {
           "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6OCwicm9sZSI6Im93bmVyIiwiaWF0IjoxNzY3NjA0NDY2LCJleHAiOjE3Njc2OTA4NjZ9.UyxzrIz7J50Z78lz4Q5_H-4xk8GPhU3u15KJPJybdcg"; // 🔴 ganti token login
 
       final url = Uri.parse(
-        "http://localhost:3000/api/invoice/download?no_invoice=$no",
+        "http://192.168.3.22:3000/api/invoice/download?no_invoice=$no",
       );
 
       final response = await http.get(

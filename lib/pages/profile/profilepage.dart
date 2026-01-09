@@ -1,8 +1,7 @@
-import 'package:ekspedisi/pages/profile/editProfil.dart';
+import 'package:ekspedisi/services/profile_service.dart';
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:intl/intl.dart';
-import 'dart:io';
 
 class ProfilPage extends StatefulWidget {
   const ProfilPage({super.key});
@@ -12,193 +11,146 @@ class ProfilPage extends StatefulWidget {
 }
 
 class _ProfilPageState extends State<ProfilPage> {
+  // ================= SERVICE =================
+  final ProfileService _profileService = ProfileService();
+
+  // SEMENTARA: ambil dari login
+  final String _nrp = '240802'; // nanti ganti dari login
+
   String _name = "ABCDEFGHIJK";
-  String _username = "";
-  String? _imagePath;
+  String _jabatan = ""; // 🔥 GANTI EMAIL → JABATAN
+  String? _photo;
+
   late String _lastLogin;
 
   @override
   void initState() {
     super.initState();
-    // Set waktu login saat halaman dibuka
     _updateLoginTime();
+    _loadProfile();
   }
 
-  // Fungsi untuk update waktu login
-  void _updateLoginTime() {
-    final now = DateTime.now();
-    // Format: 11 Nov 2025 - 15.18
-    _lastLogin = DateFormat('dd MMM yyyy - HH.mm', 'id_ID').format(now);
-  }
+  // ================= LOAD PROFILE =================
+  Future<void> _loadProfile() async {
+    try {
+      final response = await _profileService.getProfileByNrp(_nrp);
+      debugPrint('PROFILE API RESPONSE: $response');
 
-  // Fungsi untuk navigasi ke edit profil dan terima data kembali
-  Future<void> _goToEditProfile() async {
-    final result = await Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => EditProfilPage(
-          currentName: _name,
-          currentUsername: _username,
-          currentImagePath: _imagePath,
-        ),
-      ),
-    );
+      final data = response is List ? response[0] : response;
 
-    // Jika ada data yang dikembalikan, update state
-    if (result != null && result is Map<String, dynamic>) {
       setState(() {
-        _name = result['name'] ?? _name;
-        _username = result['username'] ?? _username;
-        _imagePath = result['imagePath'];
+        _name = data['namaPegawai'] ?? _name;
+        _jabatan = data['jabatan'] ?? '';
+        _photo = data['photo'];
       });
-
-      // Tampilkan notifikasi berhasil
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Profil berhasil diperbarui!'),
-            backgroundColor: Color(0xFF2F2F2F),
-            duration: Duration(seconds: 2),
-          ),
-        );
-      }
+    } catch (e) {
+      debugPrint('Load profile error: $e');
     }
   }
 
+  // ================= LOGIN TIME =================
+  void _updateLoginTime() {
+    final now = DateTime.now();
+    _lastLogin = DateFormat('dd MMM yyyy - HH.mm', 'id_ID').format(now);
+  }
+
+  // ================= UI =================
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF5F5F5),
       body: Stack(
         children: [
-          // ===================== MAIN CONTENT =====================
           SingleChildScrollView(
             child: Column(
               children: [
-                // ===================== HEADER =====================
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.only(top: 60, bottom: 50),
-                  decoration: const BoxDecoration(
-                    color: Color(0xFF1A1A1A),
-                    borderRadius: BorderRadius.vertical(
-                      bottom: Radius.circular(32),
-                    ),
-                  ),
-                  child: Column(
-                    children: [
-                      const Text(
-                        'Profil',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 26,
-                          fontWeight: FontWeight.w700,
-                          fontFamily: 'InriaSans',
+                Stack(
+                  children: [
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.only(top: 60, bottom: 50),
+                      decoration: const BoxDecoration(
+                        color: Color(0xFF1A1A1A),
+                        borderRadius: BorderRadius.vertical(
+                          bottom: Radius.circular(32),
                         ),
                       ),
-
-                      const SizedBox(height: 32),
-
-                      // FOTO PROFIL - Update berdasarkan _imagePath
-                      Container(
-                        padding: const EdgeInsets.all(4),
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          border: Border.all(color: Colors.white24, width: 2),
-                        ),
-                        child: CircleAvatar(
-                          radius: 52,
-                          backgroundImage: _imagePath != null
-                              ? FileImage(File(_imagePath!))
-                              : const AssetImage("assets/images/profile.jpg")
-                                    as ImageProvider,
-                        ),
-                      ),
-
-                      const SizedBox(height: 20),
-
-                      Text(
-                        _name,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 22,
-                          fontWeight: FontWeight.w700,
-                          fontFamily: 'InriaSans',
-                        ),
-                      ),
-
-                      const SizedBox(height: 4),
-
-                      Text(
-                        _username.isNotEmpty
-                            ? '@$_username'
-                            : 'Username tidak diatur',
-                        style: const TextStyle(
-                          color: Color(0xFF9CA3AF),
-                          fontSize: 13,
-                          fontFamily: 'InriaSans',
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-
-                const SizedBox(height: 32),
-
-                // =================== BOX EDIT PROFIL ===================
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: InkWell(
-                    onTap: _goToEditProfile,
-                    borderRadius: BorderRadius.circular(16),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 18,
-                        vertical: 16,
-                      ),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(16),
-                        color: Colors.white,
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.08),
-                            blurRadius: 12,
-                            offset: const Offset(0, 4),
-                          ),
-                        ],
-                      ),
-                      child: const Row(
+                      child: Column(
                         children: [
-                          Icon(
-                            LucideIcons.edit2,
-                            size: 20,
-                            color: Color(0xFF1A1A1A),
-                          ),
-                          SizedBox(width: 14),
-                          Text(
-                            "Edit Profil",
+                          const SizedBox(height: 20),
+                          const Text(
+                            'Profil',
                             style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600,
-                              color: Color(0xFF1A1A1A),
+                              color: Colors.white,
+                              fontSize: 26,
+                              fontWeight: FontWeight.w700,
                               fontFamily: 'InriaSans',
                             ),
                           ),
-                          Spacer(),
-                          Icon(
-                            Icons.arrow_forward_ios,
-                            size: 16,
-                            color: Color(0xFF9CA3AF),
+                          const SizedBox(height: 32),
+                          Container(
+                            padding: const EdgeInsets.all(4),
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                color: Colors.white24,
+                                width: 2,
+                              ),
+                            ),
+                            child: CircleAvatar(
+                              radius: 52,
+                              backgroundImage:
+                                  _photo != null && _photo!.isNotEmpty
+                                  ? NetworkImage(
+                                      'https://erp.pt-nikkatsu.com/media_library/pegawai/pegawai.png',
+                                    )
+                                  : const AssetImage(
+                                          "assets/images/profile.jpg",
+                                        )
+                                        as ImageProvider,
+                            ),
+                          ),
+                          const SizedBox(height: 20),
+                          Text(
+                            _name,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 22,
+                              fontWeight: FontWeight.w700,
+                              fontFamily: 'InriaSans',
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            _jabatan.isNotEmpty
+                                ? _jabatan
+                                : 'Jabatan tidak diatur',
+                            style: const TextStyle(
+                              color: Color(0xFF9CA3AF),
+                              fontSize: 13,
+                              fontFamily: 'InriaSans',
+                            ),
                           ),
                         ],
                       ),
                     ),
-                  ),
+                    Positioned(
+                      top: 40,
+                      left: 10,
+                      child: IconButton(
+                        icon: const Icon(
+                          LucideIcons.arrowLeft,
+                          color: Colors.white,
+                          size: 28,
+                        ),
+                        onPressed: () {
+                          Navigator.pop(context);
+                        },
+                      ),
+                    ),
+                  ],
                 ),
-
-                const SizedBox(height: 40),
-
-                // WAKTU LOGIN REAL-TIME
+                const SizedBox(height: 35),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 20),
                   child: Container(
@@ -222,11 +174,7 @@ class _ProfilPageState extends State<ProfilPage> {
                             color: const Color(0xFFF3F4F6),
                             borderRadius: BorderRadius.circular(10),
                           ),
-                          child: const Icon(
-                            LucideIcons.clock,
-                            size: 18,
-                            color: Color(0xFF1A1A1A),
-                          ),
+                          child: const Icon(LucideIcons.clock, size: 18),
                         ),
                         const SizedBox(width: 14),
                         Column(
@@ -255,30 +203,8 @@ class _ProfilPageState extends State<ProfilPage> {
                     ),
                   ),
                 ),
-
                 const SizedBox(height: 140),
               ],
-            ),
-          ),
-
-          // =================== TOMBOL BACK ===================
-          Positioned(
-            top: 45,
-            left: 20,
-            child: InkWell(
-              onTap: () => Navigator.pop(context),
-              child: Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.15),
-                  shape: BoxShape.circle,
-                ),
-                child: const Icon(
-                  Icons.arrow_back,
-                  size: 20,
-                  color: Colors.white,
-                ),
-              ),
             ),
           ),
         ],
