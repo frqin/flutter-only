@@ -22,7 +22,7 @@ class ScrapModel {
       id: json['id'] ?? 0,
       nopabean: json['nopabean'] ?? '',
       noseri: json['noseri'] ?? '',
-      kodeBarang: json['KodeBarang'] ?? '', // ⬅️ HURUF BESAR K (sesuai API)
+      kodeBarang: json['KodeBarang'] ?? '', 
       jumlah: json['jumlah'] ?? '0',
       nilai: json['nilai'] ?? '0',
       nomor: json['nomor'] ?? '',
