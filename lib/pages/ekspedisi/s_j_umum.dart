@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:ekspedisi/models/sjumum.dart';
 import 'package:ekspedisi/services/sj_umum_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'Sj_Umum_Detail.dart';
 
 class SJUmumSimplePage extends StatefulWidget {
   const SJUmumSimplePage({super.key});
@@ -21,14 +22,14 @@ class _SJUmumSimplePageState extends State<SJUmumSimplePage> {
     loadData();
   }
 
-  Future<String> getToken() async {
+  Future<String> _getToken() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getString('token') ?? '';
   }
 
   Future<void> loadData() async {
     try {
-      final token = await getToken();
+      final token = await _getToken();
       final data = await SjUmumService.fetchSJUmum(token);
 
       setState(() {
@@ -46,185 +47,132 @@ class _SJUmumSimplePageState extends State<SJUmumSimplePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[100],
+      backgroundColor: const Color(0xFFF5F5F5),
       appBar: AppBar(
+        centerTitle: true,
         backgroundColor: Colors.white,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
-          onPressed: () => Navigator.pop(context),
-        ),
+        elevation: 1,
+        foregroundColor: const Color(0xFF2F2F2F),
         title: const Text(
           'Surat Jalan Umum',
           style: TextStyle(
+            fontWeight: FontWeight.w700,
             fontFamily: 'InriaSans',
-            color: Colors.black,
-            fontSize: 18,
-            fontWeight: FontWeight.w600,
           ),
         ),
-
-        centerTitle: true,
       ),
       body: isLoading
-          ? const Center(child: CircularProgressIndicator())
+          ? const Center(
+              child: CircularProgressIndicator(color: Color(0xFF2F2F2F)),
+            )
           : error.isNotEmpty
           ? Center(child: Text(error))
-          : ListView.builder(
-              padding: const EdgeInsets.all(16),
-              itemCount: list.length,
-              itemBuilder: (context, index) {
-                final item = list[index];
+          : RefreshIndicator(
+              onRefresh: loadData,
+              child: ListView.builder(
+                padding: const EdgeInsets.all(16),
+                itemCount: list.length,
+                itemBuilder: (context, index) {
+                  final item = list[index];
 
-                return Container(
-                  margin: const EdgeInsets.only(bottom: 12),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(12),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.05),
-                        blurRadius: 4,
-                        offset: const Offset(0, 2),
+                  return InkWell(
+                    borderRadius: BorderRadius.circular(14),
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => SJUmumDetailPage(item: item),
+                        ),
+                      );
+                    },
+                    child: Container(
+                      margin: const EdgeInsets.only(bottom: 12),
+                      padding: const EdgeInsets.all(14),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(14),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.05),
+                            blurRadius: 8,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // Header dengan nomor dan tanggal
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              item.noSj,
-                              style: const TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                              ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          /// NO SJ
+                          Text(
+                            item.noSj,
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                              color: Color(0xFF2F2F2F),
                             ),
-                            Text(
-                              _formatDate(item.tanggal),
+                          ),
+                          const SizedBox(height: 6),
+
+                          /// CUSTOMER
+                          Text(
+                            item.customer,
+                            style: const TextStyle(
+                              fontSize: 14,
+                              color: Colors.black54,
+                            ),
+                          ),
+
+                          const SizedBox(height: 6),
+
+                          /// EKSPEDISI
+                          Text(
+                            item.ekspedisi,
+                            style: const TextStyle(
+                              fontSize: 13,
+                              color: Colors.black45,
+                            ),
+                          ),
+
+                          const SizedBox(height: 10),
+
+                          /// STATUS
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 14,
+                              vertical: 6,
+                            ),
+                            decoration: BoxDecoration(
+                              color: _statusColor(
+                                item.status,
+                              ).withOpacity(0.15),
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: Text(
+                              item.status,
                               style: TextStyle(
+                                color: _statusColor(item.status),
                                 fontSize: 12,
-                                color: Colors.grey[600],
+                                fontWeight: FontWeight.w600,
                               ),
                             ),
-                          ],
-                        ),
-                        const SizedBox(height: 12),
-
-                        // Info Barang Section
-                        _buildSection(
-                          icon: Icons.inventory_2_outlined,
-                          title: 'Info barang',
-                          children: [
-                            _buildInfoRow('No Baru', item.noBaru),
-                            _buildInfoRow('Jenis', item.jenis),
-                            _buildInfoRow('Keterangan', item.keterangan),
-                            _buildInfoRow('No Supplier', item.noSupp),
-                          ],
-                        ),
-
-                        const Divider(height: 24),
-
-                        // Pengiriman Section
-                        _buildSection(
-                          icon: Icons.local_shipping_outlined,
-                          title: 'Pengiriman',
-                          children: [
-                            _buildInfoRow('Ekspedisi', item.ekspedisi),
-                            _buildInfoRow('Customer', item.customer),
-                            _buildInfoRow('Status', item.status),
-                          ],
-                        ),
-                      ],
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                );
-              },
-            ),
-    );
-  }
-
-  Widget _buildSection({
-    required IconData icon,
-    required String title,
-    required List<Widget> children,
-  }) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            Icon(icon, size: 18, color: Colors.grey[700]),
-            const SizedBox(width: 6),
-            Text(
-              title,
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-                color: Colors.grey[700],
+                  );
+                },
               ),
             ),
-          ],
-        ),
-        const SizedBox(height: 8),
-        ...children,
-      ],
     );
   }
 
-  Widget _buildInfoRow(String label, String value) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 6),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SizedBox(
-            width: 100,
-            child: Text(
-              label,
-              style: TextStyle(fontSize: 13, color: Colors.grey[600]),
-            ),
-          ),
-          const Text(': ', style: TextStyle(fontSize: 13)),
-          Expanded(
-            child: Text(
-              value,
-              style: const TextStyle(fontSize: 13, color: Colors.black87),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  String _formatDate(String? dateStr) {
-    if (dateStr == null || dateStr.isEmpty) return '-';
-
-    try {
-      final date = DateTime.parse(dateStr);
-      final months = [
-        'Jan',
-        'Feb',
-        'Mar',
-        'Apr',
-        'Mei',
-        'Jun',
-        'Jul',
-        'Agu',
-        'Sep',
-        'Oct',
-        'Nov',
-        'Des',
-      ];
-
-      return '${date.day} ${months[date.month - 1]} ${date.year}, ${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}';
-    } catch (e) {
-      return dateStr;
+  Color _statusColor(String status) {
+    if (status.toLowerCase().contains('setuju')) {
+      return Colors.green;
     }
+    if (status.toLowerCase().contains('tolak')) {
+      return Colors.red;
+    }
+    return Colors.orange;
   }
 }

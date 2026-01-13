@@ -122,7 +122,7 @@ class _DashboardPageState extends State<DashboardPage> {
                                         style: const TextStyle(
                                           color: Colors.white,
                                           fontFamily: 'InriaSans',
-                                          fontSize: 20,
+                                          fontSize: 22,
                                           fontWeight: FontWeight.bold,
                                           letterSpacing: 0.5,
                                         ),

@@ -30,7 +30,10 @@ class _SJTagihListPageState extends State<SJTagihListPage> {
         foregroundColor: const Color(0xFF2F2F2F),
         title: const Text(
           'Surat Jalan Tagihan',
-          style: TextStyle(fontWeight: FontWeight.w600),
+          style: TextStyle(
+            fontWeight: FontWeight.w700,
+            fontFamily: 'InriaSans',
+          ),
         ),
       ),
       body: FutureBuilder<List<SjTagihModel>>(

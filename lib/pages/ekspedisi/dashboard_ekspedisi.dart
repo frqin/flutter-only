@@ -47,7 +47,7 @@ class DashboardEkspedisiPage extends StatelessWidget {
                         "Dashboard Ekspedisi",
                         style: TextStyle(
                           fontFamily: "InriaSans",
-                          fontSize: 20,
+                          fontSize: 23,
                           fontWeight: FontWeight.bold,
                           color: Color(0xFF2F2F2F),
                         ),

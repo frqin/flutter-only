@@ -33,7 +33,7 @@ class MyApp extends StatelessWidget {
               'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6OCwicm9sZSI6Im93bmVyIiwiaWF0IjoxNzY3NjcwNTkyLCJleHAiOjE3Njc3NTY5OTJ9.ct_gS07FyfM1kx0gBvKu08JUlioinYcms3wnB6wapzI',
         ),
         '/sj-tagih': (context) => const SJTagihListPage(),
-        '/invoice-export': (context) => InvoiceEksporPage(),
+        '/invoice-export': (context) => InvoicePage(),
       },
     );
   }

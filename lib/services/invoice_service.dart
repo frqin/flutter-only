@@ -1,48 +1,70 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import '../models/invoice.dart';
 
 class InvoiceService {
-  static const String baseUrl = 'http://localhost:3000/api/invoice';
-  // ⚠️ pakai ini kalau Android Emulator
-  // kalau HP fisik: ganti IP laptop
+  static const String baseUrl = 'https://erp.pt-nikkatsu.com/api/invoice';
+  static const String apiKey = 'beacukai12345';
 
-  static Future<List<Map<String, dynamic>>> getAllInvoices(String token) async {
+  /// ===============================
+  /// GET LIST
+  /// ===============================
+  static Future<List<Invoice>> getInvoices() async {
     final response = await http.get(
       Uri.parse(baseUrl),
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer $token',
-      },
+      headers: {'api-key': apiKey, 'Accept': 'application/json'},
     );
 
-    print('STATUS CODE: ${response.statusCode}');
-    print('BODY: ${response.body}');
-
     if (response.statusCode == 200) {
-      final List raw = jsonDecode(response.body);
-
-      return raw.map<Map<String, dynamic>>((json) {
-        return {
-          "no": json["NO_INVOICE"] ?? "",
-          "status": json["status"] ?? "",
-          "kapal": json["SHIP"] ?? "",
-          "deskripsi": json["DESCRIPTION"] ?? "",
-          "from": json["ASAL"] ?? "",
-          "to": json["TUJUAN"] ?? "",
-          "total": _parseInt(json["BIAYA"]),
-        };
-      }).toList();
+      final List data = json.decode(response.body);
+      return data.map((e) => Invoice.fromJson(e)).toList();
     } else {
-      throw Exception('Gagal load invoice');
+      throw Exception('GET Invoice gagal (${response.statusCode})');
     }
   }
 
-  static int _parseInt(dynamic value) {
-    if (value == null) return 0;
-    if (value is int) return value;
-    if (value is String && value.isNotEmpty) {
-      return int.tryParse(value.replaceAll('.', '')) ?? 0;
+  /// ===============================
+  /// GET DETAIL (🔥 SESUAI API LU)
+  /// ===============================
+  static Future<Invoice> getDetail(String no) async {
+    final response = await http.get(
+      Uri.parse('$baseUrl/$no'),
+      headers: {'api-key': apiKey, 'Accept': 'application/json'},
+    );
+
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body);
+
+      // 🔥 API BALIK ARRAY → AMBIL INDEX 0
+      if (data is List && data.isNotEmpty) {
+        return Invoice.fromJson(data.first);
+      }
+
+      // kalau ternyata object
+      if (data is Map<String, dynamic>) {
+        return Invoice.fromJson(data);
+      }
+
+      throw Exception('Data detail invoice kosong');
+    } else {
+      throw Exception('GET Detail Invoice gagal (${response.statusCode})');
     }
-    return 0;
+  }
+
+  /// ===============================
+  /// UPDATE STATUS → DISETUJUI
+  /// ===============================
+  static Future<bool> selesaikanInvoice(String no) async {
+    final response = await http.put(
+      Uri.parse('$baseUrl/$no'),
+      headers: {
+        'api-key': apiKey,
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+      body: json.encode({'status': 'Disetujui'}),
+    );
+
+    return response.statusCode == 200;
   }
 }
