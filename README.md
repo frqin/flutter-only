@@ -20,6 +20,8 @@ https://www.figma.com/proto/zQ82zgniA2N2AdpRKJmZQe/ekspedisi?node-id=0-1&t=VeO5h
  https://erp.pt-nikkatsu.com/api/users/nrp (profile)
  https://erp.pt-nikkatsu.com/api/sjt - untuk cari no surat jalannya (https://erp.pt-nikkatsu.com/api/sjt/2025110006)
  https://erp.pt-nikkatsu.com/api/sju - (sama seperti sjt jika cari info surat jalan)
+ https://erp.pt-nikkatsu.com/api/invoice (sama seperti sjt jika cari info surat jalan)
+ https://erp.pt-nikkatsu.com/api/sjs
 
 
 

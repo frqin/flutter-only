@@ -517,7 +517,7 @@ class _DetailInvoiceState extends State<DetailInvoice> {
                     disabledBackgroundColor: Colors.grey.withOpacity(0.4),
                     disabledForegroundColor: Colors.white.withOpacity(0.6),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
+                      borderRadius: BorderRadius.circular(14),
                     ),
                     elevation: 2,
                   ),
