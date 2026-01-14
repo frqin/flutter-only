@@ -7,6 +7,7 @@ import 'package:ekspedisi/pages/riwayat/riwayat_page.dart';
 import 'package:ekspedisi/pages/ekspedisi/dashboard_ekspedisi.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:ekspedisi/services/notification_service.dart';
 
 class DashboardPage extends StatefulWidget {
   const DashboardPage({Key? key}) : super(key: key);
@@ -25,6 +26,8 @@ class _DashboardPageState extends State<DashboardPage> {
   @override
   void initState() {
     super.initState();
+    NotificationService.init();
+    NotificationService.listen();
     _loadUserData();
     _scrollController.addListener(_onScroll);
   }

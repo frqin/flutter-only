@@ -6,10 +6,18 @@ import 'package:ekspedisi/pages/login/welcomepage.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/date_symbol_data_local.dart';
 
-void main() {
-  initializeDateFormatting('id_ID', null).then((_) {
-    runApp(const MyApp());
-  });
+// 🔥 TAMBAHAN
+import 'package:firebase_core/firebase_core.dart';
+
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  // 🔥 INIT FIREBASE (WAJIB)
+  await Firebase.initializeApp();
+
+  await initializeDateFormatting('id_ID', null);
+
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
@@ -25,7 +33,6 @@ class MyApp extends StatelessWidget {
         useMaterial3: true,
       ),
       home: WelcomePage(),
-
       routes: {
         '/sj-umum': (context) => const SJUmumSimplePage(),
         '/scrap': (context) => const ScrapPage(),
