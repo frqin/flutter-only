@@ -27,7 +27,9 @@ class _DashboardPageState extends State<DashboardPage> {
   void initState() {
     super.initState();
     NotificationService.init();
-    NotificationService.listen();
+    NotificationService.listenForeground();
+    NotificationService.listenOpenedApp();
+
     _loadUserData();
     _scrollController.addListener(_onScroll);
   }

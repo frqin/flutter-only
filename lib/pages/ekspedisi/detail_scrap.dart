@@ -88,7 +88,6 @@ class _DetailScrapPageState extends State<DetailScrapPage> {
                       padding: const EdgeInsets.all(16),
                       child: Column(
                         children: [
-                          _row('No', item.no),
                           _row('No SJ', item.noSj),
                           _row(
                             'Tanggal',
