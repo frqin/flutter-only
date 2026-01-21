@@ -25,9 +25,8 @@ class _SJTagihDetailPageState extends State<SJTagihDetailPage> {
     final success = await SjTagihService.setujui(no);
 
     if (success) {
-      setState(() {
-        isSuccess = true; // 🔴 STOP reload future
-      });
+      // LANGSUNG BALIK KE LIST
+      Navigator.pop(context, true);
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -55,7 +54,7 @@ class _SJTagihDetailPageState extends State<SJTagihDetailPage> {
           ),
         ),
       ),
-      body: isSuccess ? _successView() : _detailView(),
+      body: _detailView(),
     );
   }
 

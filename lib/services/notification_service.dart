@@ -1,109 +1,119 @@
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:dio/dio.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class NotificationService {
   static final FirebaseMessaging _messaging = FirebaseMessaging.instance;
 
-  // 🔥 Endpoint backend SIMPAN FCM TOKEN
+  // API BACKEND
   static const String _apiUrl = 'https://erp.pt-nikkatsu.com/api/token';
-
-  // 🔥 API KEY dari backend
   static const String _apiKey = 'beacukai12345';
 
   /// =========================
-  /// PANGGIL SEKALI SAJA
-  /// (Setelah login / dashboard)
+  /// PANGGIL SETELAH LOGIN
   /// =========================
   static Future<void> init() async {
-    try {
-      // 1️⃣ Minta izin notifikasi
-      await _messaging.requestPermission(alert: true, badge: true, sound: true);
+    final prefs = await SharedPreferences.getInstance();
+    final isLogin = prefs.getBool('is_logged_in') ?? false;
 
-      // 2️⃣ Ambil token pertama kali
-      final String? token = await _messaging.getToken();
-      print('📱 FCM TOKEN AWAL: $token');
-
-      if (token != null && token.isNotEmpty) {
-        await _sendTokenToBackend(token);
-      }
-
-      // 3️⃣ LISTEN JIKA TOKEN BERUBAH (WAJIB)
-      _messaging.onTokenRefresh.listen((newToken) async {
-        print('🔁 FCM TOKEN BERUBAH: $newToken');
-        await _sendTokenToBackend(newToken);
-      });
-
-      // 4️⃣ LISTENER NOTIF
-      listenForeground();
-      listenOpenedApp();
-      listenTerminated();
-    } catch (e) {
-      print('❌ Error init notification: $e');
+    if (!isLogin) {
+      print('ℹ️ User belum login, skip notification init');
+      return;
     }
+
+    // 🔔 Request permission
+    await _messaging.requestPermission(alert: true, badge: true, sound: true);
+
+    // 📱 Ambil FCM token
+    final token = await _messaging.getToken();
+    print('📱 FCM TOKEN: $token');
+
+    if (token != null && token.isNotEmpty) {
+      await _saveAndSendToken(token);
+    }
+
+    // 🔁 Token refresh
+    _messaging.onTokenRefresh.listen((newToken) async {
+      print('🔄 FCM TOKEN UPDATED: $newToken');
+      await _saveAndSendToken(newToken);
+    });
+
+    listenForeground();
+    listenOpenedApp();
+    listenTerminated();
+  }
+
+  /// =========================
+  /// SIMPAN LOKAL + KIRIM BACKEND
+  /// =========================
+  static Future<void> _saveAndSendToken(String token) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('fcm_token', token);
+    print('💾 FCM token disimpan di SharedPreferences');
+
+    await _sendTokenToBackend(token);
   }
 
   /// =========================
   /// KIRIM TOKEN KE BACKEND
   /// =========================
-  static Future<void> _sendTokenToBackend(String fcmToken) async {
-    final dio = Dio();
-
+  static Future<void> _sendTokenToBackend(String token) async {
     try {
+      final dio = Dio();
+
       final response = await dio.put(
         _apiUrl,
-        data: {"fcm_token": fcmToken},
+        data: {'token': token},
         options: Options(
-          headers: {"API-KEY": _apiKey, "Content-Type": "application/json"},
+          headers: {
+            'API-KEY': _apiKey, // ✅ HARUS INI
+            'Accept': 'application/json',
+          },
           validateStatus: (status) => status != null && status < 500,
         ),
       );
 
       if (response.statusCode == 200 || response.statusCode == 201) {
-        print('✅ FCM token berhasil disimpan');
+        print('✅ FCM token berhasil dikirim ke backend');
       } else {
-        print('⚠️ Backend tolak token');
-        print('STATUS: ${response.statusCode}');
-        print('DATA: ${response.data}');
+        print('⚠️ Backend menolak token (${response.statusCode})');
+        print('Response: ${response.data}');
       }
-    } on DioException catch (e) {
-      print('❌ Dio Error');
-      print('STATUS: ${e.response?.statusCode}');
-      print('DATA: ${e.response?.data}');
     } catch (e) {
-      print('❌ Error lain: $e');
+      print('❌ Gagal kirim FCM token: $e');
     }
   }
 
   /// =========================
-  /// NOTIF MASUK SAAT APP TERBUKA
+  /// FOREGROUND NOTIFICATION
   /// =========================
   static void listenForeground() {
-    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+    FirebaseMessaging.onMessage.listen((message) {
       print('🔔 NOTIF FOREGROUND');
-      print('TITLE: ${message.notification?.title}');
-      print('BODY : ${message.notification?.body}');
-      print('DATA : ${message.data}');
+      print('Title: ${message.notification?.title}');
+      print('Body: ${message.notification?.body}');
+      print('Data: ${message.data}');
     });
   }
 
   /// =========================
-  /// NOTIF DIKLIK DARI BACKGROUND
+  /// BACKGROUND (DIKLIK)
   /// =========================
   static void listenOpenedApp() {
     FirebaseMessaging.onMessageOpenedApp.listen((message) {
-      print('📲 NOTIF DIKLIK (BACKGROUND)');
-      print('DATA: ${message.data}');
+      print('📲 NOTIF DIKLIK');
+      print('Data: ${message.data}');
     });
   }
 
   /// =========================
-  /// NOTIF DIKLIK SAAT APP MATI
+  /// TERMINATED (APP MATI)
   /// =========================
   static Future<void> listenTerminated() async {
     final message = await _messaging.getInitialMessage();
     if (message != null) {
-      print('🚀 APP DIBUKA DARI NOTIF (TERMINATED)');
-      print('DATA: ${message.data}');
+      print('🚀 APP DIBUKA DARI NOTIF');
+      print('Data: ${message.data}');
     }
   }
 }

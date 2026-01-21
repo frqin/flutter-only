@@ -74,14 +74,24 @@ class _SJTagihListPageState extends State<SJTagihListPage> {
 
                 return InkWell(
                   borderRadius: BorderRadius.circular(14),
-                  onTap: () {
-                    Navigator.push(
+
+                  /// 🔴 INI BAGIAN YANG DITAMBAHKAN
+                  onTap: () async {
+                    final result = await Navigator.push(
                       context,
                       MaterialPageRoute(
                         builder: (_) => SJTagihDetailPage(no: item.no),
                       ),
                     );
+
+                    // 🔄 JIKA DETAIL MENGEMBALIKAN true → REFRESH LIST
+                    if (result == true) {
+                      setState(() {
+                        futureData = SjTagihService.getAll();
+                      });
+                    }
                   },
+
                   child: Container(
                     margin: const EdgeInsets.only(bottom: 12),
                     padding: const EdgeInsets.all(14),

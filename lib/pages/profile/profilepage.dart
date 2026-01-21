@@ -2,6 +2,7 @@ import 'package:ekspedisi/services/profile_service.dart';
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ProfilPage extends StatefulWidget {
   const ProfilPage({super.key});
@@ -18,16 +19,20 @@ class _ProfilPageState extends State<ProfilPage> {
   final String _nrp = '240802'; // nanti ganti dari login
 
   String _name = "ABCDEFGHIJK";
-  String _jabatan = ""; // 🔥 GANTI EMAIL → JABATAN
+  String _jabatan = "";
   String? _photo;
 
   late String _lastLogin;
+
+  // ================= SETTINGS =================
+  bool _whatsappNotif = false;
 
   @override
   void initState() {
     super.initState();
     _updateLoginTime();
     _loadProfile();
+    _loadWhatsappSetting();
   }
 
   // ================= LOAD PROFILE =================
@@ -52,6 +57,19 @@ class _ProfilPageState extends State<ProfilPage> {
   void _updateLoginTime() {
     final now = DateTime.now();
     _lastLogin = DateFormat('dd MMM yyyy - HH.mm', 'id_ID').format(now);
+  }
+
+  // ================= WHATSAPP SETTING =================
+  Future<void> _loadWhatsappSetting() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _whatsappNotif = prefs.getBool('wa_notif') ?? false;
+    });
+  }
+
+  Future<void> _saveWhatsappSetting(bool value) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('wa_notif', value);
   }
 
   // ================= UI =================
@@ -150,7 +168,10 @@ class _ProfilPageState extends State<ProfilPage> {
                     ),
                   ],
                 ),
+
                 const SizedBox(height: 35),
+
+                // ================= TERAKHIR LOGIN =================
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 20),
                   child: Container(
@@ -203,6 +224,81 @@ class _ProfilPageState extends State<ProfilPage> {
                     ),
                   ),
                 ),
+
+                const SizedBox(height: 16),
+
+                // ================= SETTINGS WHATSAPP =================
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(14),
+                      color: Colors.white,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.05),
+                          blurRadius: 8,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(10),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFF3F4F6),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: const Icon(
+                            LucideIcons.messageCircle,
+                            size: 18,
+                          ),
+                        ),
+                        const SizedBox(width: 14),
+                        const Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Notifikasi WhatsApp',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w600,
+                                  fontFamily: 'InriaSans',
+                                ),
+                              ),
+                              SizedBox(height: 2),
+                              Text(
+                                'Terima pemberitahuan via WhatsApp',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: Color(0xFF6B7280),
+                                  fontFamily: 'InriaSans',
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Switch(
+                          value: _whatsappNotif,
+                          activeColor: Colors.green,
+                          onChanged: (value) {
+                            setState(() {
+                              _whatsappNotif = value;
+                            });
+                            _saveWhatsappSetting(value);
+                            debugPrint(
+                              'WhatsApp Notification: ${value ? "ON" : "OFF"}',
+                            );
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+
                 const SizedBox(height: 140),
               ],
             ),

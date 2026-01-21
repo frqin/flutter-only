@@ -21,32 +21,14 @@ class _SJUmumDetailPageState extends State<SJUmumDetailPage> {
 
   Future<void> _setujui() async {
     final ok = await SjUmumService.setujui(item.no);
-    if (ok) {
-      setState(() {
-        item = SjUmum(
-          no: item.no,
-          noSj: item.noSj,
-          tanggal: item.tanggal,
-          noBaru: item.noBaru,
-          noSupp: item.noSupp,
-          keterangan: item.keterangan,
-          jenis: item.jenis,
-          ekspedisi: item.ekspedisi,
-          status: 'Disetujui',
-          lastUpdate: item.lastUpdate,
-          userId: item.userId,
-          customer: item.customer,
-          kota: item.kota,
-          produk: item.produk,
-          jumlahBrg: item.jumlahBrg,
-          ketProduk: item.ketProduk,
-          unit: item.unit,
-        );
-      });
 
+    if (ok) {
+      // ⬅️ BALIK KE LIST + KIRIM SINYAL REFRESH
+      Navigator.pop(context, true);
+    } else {
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(const SnackBar(content: Text('Berhasil disetujui')));
+      ).showSnackBar(const SnackBar(content: Text('Gagal menyetujui')));
     }
   }
 

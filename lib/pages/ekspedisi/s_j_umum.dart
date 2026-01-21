@@ -34,6 +34,7 @@ class _SJUmumSimplePageState extends State<SJUmumSimplePage> {
 
       setState(() {
         list = data;
+        error = '';
         isLoading = false;
       });
     } catch (e) {
@@ -67,6 +68,13 @@ class _SJUmumSimplePageState extends State<SJUmumSimplePage> {
             )
           : error.isNotEmpty
           ? Center(child: Text(error))
+          : list.isEmpty
+          ? const Center(
+              child: Text(
+                'Tidak ada yang perlu disetujui',
+                style: TextStyle(fontSize: 16, color: Colors.black54),
+              ),
+            )
           : RefreshIndicator(
               onRefresh: loadData,
               child: ListView.builder(
@@ -77,13 +85,24 @@ class _SJUmumSimplePageState extends State<SJUmumSimplePage> {
 
                   return InkWell(
                     borderRadius: BorderRadius.circular(14),
-                    onTap: () {
-                      Navigator.push(
+                    onTap: () async {
+                      final result = await Navigator.push(
                         context,
                         MaterialPageRoute(
                           builder: (_) => SJUmumDetailPage(item: item),
                         ),
                       );
+
+                      if (result == true) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Surat Jalan berhasil disetujui'),
+                            backgroundColor: Colors.green,
+                          ),
+                        );
+
+                        loadData();
+                      }
                     },
                     child: Container(
                       margin: const EdgeInsets.only(bottom: 12),
@@ -102,7 +121,6 @@ class _SJUmumSimplePageState extends State<SJUmumSimplePage> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          /// NO SJ
                           Text(
                             item.noSj,
                             style: const TextStyle(
@@ -112,8 +130,6 @@ class _SJUmumSimplePageState extends State<SJUmumSimplePage> {
                             ),
                           ),
                           const SizedBox(height: 6),
-
-                          /// CUSTOMER
                           Text(
                             item.customer,
                             style: const TextStyle(
@@ -121,10 +137,7 @@ class _SJUmumSimplePageState extends State<SJUmumSimplePage> {
                               color: Colors.black54,
                             ),
                           ),
-
                           const SizedBox(height: 6),
-
-                          /// EKSPEDISI
                           Text(
                             item.ekspedisi,
                             style: const TextStyle(
@@ -132,10 +145,7 @@ class _SJUmumSimplePageState extends State<SJUmumSimplePage> {
                               color: Colors.black45,
                             ),
                           ),
-
                           const SizedBox(height: 10),
-
-                          /// STATUS
                           Container(
                             padding: const EdgeInsets.symmetric(
                               horizontal: 14,

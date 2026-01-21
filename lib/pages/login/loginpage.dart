@@ -1,5 +1,5 @@
-import 'package:ekspedisi/pages/home/dashboard.dart';
 import 'package:flutter/material.dart';
+import 'package:ekspedisi/pages/home/dashboard.dart';
 import 'package:ekspedisi/services/auth_service.dart';
 
 class LoginPage extends StatefulWidget {
@@ -17,35 +17,30 @@ class _LoginPageState extends State<LoginPage> {
   bool _obscure = true;
   bool _loading = false;
 
-  // ➜ Ganti seluruh fungsi _login dengan ini
   Future<void> _login() async {
     if (emailController.text.isEmpty || passController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Email dan Password tidak boleh kosong'),
-          backgroundColor: Color.fromARGB(255, 127, 118, 117),
+          backgroundColor: Colors.red,
         ),
       );
       return;
     }
 
-    setState(() {
-      _loading = true;
-    });
+    setState(() => _loading = true);
 
     final result = await auth.loginOwner(
       emailController.text.trim(),
       passController.text.trim(),
     );
 
-    setState(() {
-      _loading = false;
-    });
+    setState(() => _loading = false);
 
     if (result == true) {
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => const DashboardPage()),
+        MaterialPageRoute(builder: (_) => const DashboardPage()),
       );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -63,7 +58,6 @@ class _LoginPageState extends State<LoginPage> {
           Container(
             width: double.infinity,
             padding: const EdgeInsets.only(top: 120, bottom: 60),
-            color: const Color(0xFF2F2F2F),
             child: Column(
               children: [
                 Image.asset(
@@ -85,7 +79,6 @@ class _LoginPageState extends State<LoginPage> {
               ],
             ),
           ),
-
           Expanded(
             child: Container(
               width: double.infinity,
@@ -109,7 +102,6 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                     ),
                     const SizedBox(height: 40),
-
                     const Text(
                       'E-mail',
                       style: TextStyle(fontWeight: FontWeight.bold),
@@ -119,28 +111,21 @@ class _LoginPageState extends State<LoginPage> {
                       controller: emailController,
                       keyboardType: TextInputType.emailAddress,
                       decoration: InputDecoration(
-                        filled: true,
-                        fillColor: Colors.white,
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(10),
                         ),
                       ),
                     ),
-
                     const SizedBox(height: 20),
-
                     const Text(
                       'Password',
                       style: TextStyle(fontWeight: FontWeight.bold),
                     ),
                     const SizedBox(height: 8),
-
                     TextField(
                       controller: passController,
                       obscureText: _obscure,
                       decoration: InputDecoration(
-                        filled: true,
-                        fillColor: Colors.white,
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(10),
                         ),
@@ -149,16 +134,12 @@ class _LoginPageState extends State<LoginPage> {
                             _obscure ? Icons.visibility_off : Icons.visibility,
                           ),
                           onPressed: () {
-                            setState(() {
-                              _obscure = !_obscure;
-                            });
+                            setState(() => _obscure = !_obscure);
                           },
                         ),
                       ),
                     ),
-
                     const SizedBox(height: 40),
-
                     SizedBox(
                       width: double.infinity,
                       height: 48,
@@ -169,8 +150,7 @@ class _LoginPageState extends State<LoginPage> {
                             borderRadius: BorderRadius.circular(12),
                           ),
                         ),
-                        onPressed: _login,
-                        // ➜ Ubah menjadi ini
+                        onPressed: _loading ? null : _login,
                         child: _loading
                             ? const CircularProgressIndicator(
                                 color: Colors.white,

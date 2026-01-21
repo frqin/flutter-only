@@ -2,12 +2,12 @@ import 'package:ekspedisi/pages/home/detailApprove.dart';
 import 'package:ekspedisi/pages/profile/profilepage.dart';
 import 'package:ekspedisi/pages/purchasing/Dashbord_purchasing.dart';
 import 'package:ekspedisi/pages/login/logout.dart';
+import 'package:ekspedisi/services/notification_service.dart';
 import 'package:flutter/material.dart';
 import 'package:ekspedisi/pages/riwayat/riwayat_page.dart';
 import 'package:ekspedisi/pages/ekspedisi/dashboard_ekspedisi.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:ekspedisi/services/notification_service.dart';
 
 class DashboardPage extends StatefulWidget {
   const DashboardPage({Key? key}) : super(key: key);
@@ -26,12 +26,10 @@ class _DashboardPageState extends State<DashboardPage> {
   @override
   void initState() {
     super.initState();
-    NotificationService.init();
-    NotificationService.listenForeground();
-    NotificationService.listenOpenedApp();
 
     _loadUserData();
     _scrollController.addListener(_onScroll);
+    NotificationService.init();
   }
 
   @override

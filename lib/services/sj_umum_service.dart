@@ -27,10 +27,18 @@ class SjUmumService {
             .toList();
       }
 
+      // Format aneh → baru error
       throw Exception('Format response API tidak dikenali');
-    } else {
-      throw Exception('Gagal mengambil SJ Umum (${response.statusCode})');
     }
+
+    // ⬇️ INI YANG PENTING
+    if (response.statusCode == 404) {
+      // TIDAK ADA DATA = BUKAN ERROR
+      return [];
+    }
+
+    // ⬇️ BARU ERROR BENERAN
+    throw Exception('Server error (${response.statusCode})');
   }
 
   /// Setujui SJ Umum (update field Status jadi Disetujui)

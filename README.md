@@ -35,7 +35,6 @@ https://www.figma.com/proto/zQ82zgniA2N2AdpRKJmZQe/ekspedisi?node-id=0-1&t=VeO5h
 ## login
   
 pt nikatsu
-Password: nikkatsuapprove12345
-Denny Ilyas, ST, MBA
-Email: nikkatsu_approve@gmail.com
+nikkatsu@gmail.com 
+nikkatsu123
 

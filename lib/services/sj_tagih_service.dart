@@ -14,7 +14,7 @@ class SjTagihService {
     );
 
     if (response.statusCode != 200) {
-      throw Exception('Gagal mengambil Surat Jalan Tagihan');
+      throw ('Tidak ada yang perlu di setujui');
     }
 
     final decoded = jsonDecode(response.body);

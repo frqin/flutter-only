@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:ekspedisi/pages/login/loginpage.dart';
+import 'package:ekspedisi/services/auth_service.dart';
 
 class LogoutHelper {
   static Future<void> showLogoutDialog(BuildContext context) async {
@@ -20,9 +20,9 @@ class LogoutHelper {
                   color: Colors.red.shade50,
                   borderRadius: BorderRadius.circular(10),
                 ),
-                child: Icon(
+                child: const Icon(
                   Icons.logout_rounded,
-                  color: const Color.fromARGB(255, 68, 44, 44),
+                  color: Color.fromARGB(255, 68, 44, 44),
                   size: 24,
                 ),
               ),
@@ -48,12 +48,6 @@ class LogoutHelper {
           actions: [
             TextButton(
               onPressed: () => Navigator.of(dialogContext).pop(),
-              style: TextButton.styleFrom(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 20,
-                  vertical: 12,
-                ),
-              ),
               child: const Text(
                 'Batal',
                 style: TextStyle(
@@ -69,14 +63,17 @@ class LogoutHelper {
                 // Tutup dialog
                 Navigator.of(dialogContext).pop();
 
-                // Hapus data user
-                final prefs = await SharedPreferences.getInstance();
-                await prefs.clear();
+                // =========================
+                // LOGOUT RESMI (SERVICE)
+                // =========================
+                await AuthService().logout();
 
-                // Navigate ke login page
+                // =========================
+                // KEMBALI KE LOGIN
+                // =========================
                 if (context.mounted) {
                   Navigator.of(context).pushAndRemoveUntil(
-                    MaterialPageRoute(builder: (context) => const LoginPage()),
+                    MaterialPageRoute(builder: (_) => const LoginPage()),
                     (route) => false,
                   );
                 }
@@ -84,14 +81,9 @@ class LogoutHelper {
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color.fromARGB(255, 88, 57, 57),
                 foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 20,
-                  vertical: 12,
-                ),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10),
                 ),
-                elevation: 0,
               ),
               child: const Text(
                 'Logout',
@@ -109,7 +101,9 @@ class LogoutHelper {
   }
 }
 
-// Widget untuk tombol logout yang bisa digunakan di berbagai tempat
+/// =========================
+/// WIDGET TOMBOL LOGOUT
+/// =========================
 class LogoutButton extends StatelessWidget {
   final bool showLabel;
   final IconData? customIcon;
@@ -117,17 +111,16 @@ class LogoutButton extends StatelessWidget {
   final double? iconSize;
 
   const LogoutButton({
-    Key? key,
+    super.key,
     this.showLabel = false,
     this.customIcon,
     this.iconColor,
     this.iconSize,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
     if (showLabel) {
-      // Tombol dengan label (untuk drawer atau menu)
       return ListTile(
         leading: Icon(
           customIcon ?? Icons.logout_rounded,
@@ -142,17 +135,16 @@ class LogoutButton extends StatelessWidget {
         ),
         onTap: () => LogoutHelper.showLogoutDialog(context),
       );
-    } else {
-      // Icon button saja
-      return IconButton(
-        icon: Icon(
-          customIcon ?? Icons.logout_rounded,
-          color: iconColor ?? Colors.white,
-          size: iconSize ?? 24,
-        ),
-        onPressed: () => LogoutHelper.showLogoutDialog(context),
-        tooltip: 'Logout',
-      );
     }
+
+    return IconButton(
+      icon: Icon(
+        customIcon ?? Icons.logout_rounded,
+        color: iconColor ?? Colors.white,
+        size: iconSize ?? 24,
+      ),
+      tooltip: 'Logout',
+      onPressed: () => LogoutHelper.showLogoutDialog(context),
+    );
   }
 }
