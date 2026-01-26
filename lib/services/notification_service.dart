@@ -1,6 +1,8 @@
+import 'dart:io';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:dio/dio.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:device_info_plus/device_info_plus.dart';
 
 class NotificationService {
   static final FirebaseMessaging _messaging = FirebaseMessaging.instance;
@@ -21,7 +23,7 @@ class NotificationService {
       return;
     }
 
-    // 🔔 Request permission
+    // 🔔 Permission
     await _messaging.requestPermission(alert: true, badge: true, sound: true);
 
     // 📱 Ambil FCM token
@@ -43,9 +45,8 @@ class NotificationService {
     listenTerminated();
   }
 
-  /// =========================
   /// SIMPAN LOKAL + KIRIM BACKEND
-  /// =========================
+
   static Future<void> _saveAndSendToken(String token) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('fcm_token', token);
@@ -54,27 +55,60 @@ class NotificationService {
     await _sendTokenToBackend(token);
   }
 
-  /// =========================
-  /// KIRIM TOKEN KE BACKEND
-  /// =========================
+  /// AMBIL INFO DEVICE
+
+  static Future<Map<String, String>> _getDeviceInfo() async {
+    final deviceInfo = DeviceInfoPlugin();
+
+    if (Platform.isAndroid) {
+      final android = await deviceInfo.androidInfo;
+      return {
+        'device_id': android.id,
+        'device_type': 'android',
+        'device_model': android.model,
+      };
+    }
+
+    if (Platform.isIOS) {
+      final ios = await deviceInfo.iosInfo;
+      return {
+        'device_id': ios.identifierForVendor ?? 'unknown',
+        'device_type': 'ios',
+        'device_model': ios.utsname.machine,
+      };
+    }
+
+    return {
+      'device_id': 'unknown',
+      'device_type': 'unknown',
+      'device_model': 'unknown',
+    };
+  }
+
+  /// KIRIM TOKEN (BY DEVICE)
+
   static Future<void> _sendTokenToBackend(String token) async {
     try {
       final dio = Dio();
+      final device = await _getDeviceInfo();
 
       final response = await dio.put(
         _apiUrl,
-        data: {'token': token},
+        data: {
+          'token': token,
+          'device_id': device['device_id'],
+          'device_type': device['device_type'],
+          'device_model': device['device_model'],
+        },
         options: Options(
-          headers: {
-            'API-KEY': _apiKey, // ✅ HARUS INI
-            'Accept': 'application/json',
-          },
+          contentType: Headers.formUrlEncodedContentType, // 🔥 INI PENTING
+          headers: {'API-KEY': _apiKey, 'Accept': 'application/json'},
           validateStatus: (status) => status != null && status < 500,
         ),
       );
 
       if (response.statusCode == 200 || response.statusCode == 201) {
-        print('✅ FCM token berhasil dikirim ke backend');
+        print('✅ FCM token berhasil dikirim (by device)');
       } else {
         print('⚠️ Backend menolak token (${response.statusCode})');
         print('Response: ${response.data}');
@@ -85,7 +119,7 @@ class NotificationService {
   }
 
   /// =========================
-  /// FOREGROUND NOTIFICATION
+  /// FOREGROUND
   /// =========================
   static void listenForeground() {
     FirebaseMessaging.onMessage.listen((message) {
@@ -97,7 +131,7 @@ class NotificationService {
   }
 
   /// =========================
-  /// BACKGROUND (DIKLIK)
+  /// BACKGROUND
   /// =========================
   static void listenOpenedApp() {
     FirebaseMessaging.onMessageOpenedApp.listen((message) {
@@ -107,7 +141,7 @@ class NotificationService {
   }
 
   /// =========================
-  /// TERMINATED (APP MATI)
+  /// TERMINATED
   /// =========================
   static Future<void> listenTerminated() async {
     final message = await _messaging.getInitialMessage();

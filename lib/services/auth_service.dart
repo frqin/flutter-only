@@ -16,9 +16,12 @@ class AuthService {
   );
 
   /// =========================
-  /// LOGIN USER
+  /// LOGIN USER (FINAL)
   /// =========================
-  Future<bool> loginOwner(String email, String password) async {
+  Future<Map<String, dynamic>?> loginOwner(
+    String email,
+    String password,
+  ) async {
     try {
       final response = await _dio.post(
         '/api/users',
@@ -30,55 +33,31 @@ class AuthService {
       if (data != null && data['status'] == true) {
         final prefs = await SharedPreferences.getInstance();
 
-        // =========================
-        // SIMPAN SESSION LOGIN
-        // =========================
         await prefs.setBool('is_logged_in', true);
         await prefs.setString('user_email', email);
 
-        // =========================
-        // OPTIONAL: TOKEN AUTH
-        // =========================
-        // if (data['token'] != null) {
-        //   await prefs.setString('auth_token', data['token']);
-        // }
+        // 🔥 SIMPAN NRP (INI KUNCI SEMUANYA)
+        if (data['nrp'] != null) {
+          await prefs.setString('nrp', data['nrp']);
+        }
 
         print('✅ Login sukses');
-        print('💾 Session disimpan di SharedPreferences');
-
-        return true;
-      } else {
-        print('❌ Login gagal: ${data?['message']}');
-        return false;
+        return data; // ⬅️ BALIK DATA USER
       }
+
+      print('❌ Login gagal');
+      return null;
     } catch (e) {
       print('❌ Error login: $e');
-      return false;
+      return null;
     }
   }
 
   /// =========================
-  /// CEK LOGIN (AUTO LOGIN)
-  /// =========================
-  Future<bool> isLoggedIn() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getBool('is_logged_in') ?? false;
-  }
-
-  /// =========================
-  /// LOGOUT (CLEAR SESSION)
+  /// LOGOUT
   /// =========================
   Future<void> logout() async {
     final prefs = await SharedPreferences.getInstance();
-
-    // ❌ HAPUS SESSION LOGIN
-    await prefs.setBool('is_logged_in', false);
-    await prefs.remove('user_email');
-
-    // ❌ OPTIONAL: HAPUS AUTH & FCM
-    await prefs.remove('auth_token');
-    await prefs.remove('fcm_token');
-
-    print('🚪 Logout sukses, session dihapus');
+    await prefs.clear();
   }
 }

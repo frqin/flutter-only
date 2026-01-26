@@ -61,7 +61,7 @@ class MyApp extends StatelessWidget {
 
           // Jika sudah login → Dashboard
           if (snapshot.data == true) {
-            return const DashboardPage();
+            return const DashboardPage(nrp: '');
           }
 
           // Jika belum login → Welcome

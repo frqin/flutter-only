@@ -37,14 +37,21 @@ class _LoginPageState extends State<LoginPage> {
 
     setState(() => _loading = false);
 
-    if (result == true) {
+    if (result != null && result['nrp'] != null) {
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (_) => const DashboardPage()),
+        MaterialPageRoute(
+          builder: (_) => DashboardPage(
+            nrp: result['nrp'], // ✅ NRP ASLI DARI API
+          ),
+        ),
       );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(result.toString()), backgroundColor: Colors.red),
+        const SnackBar(
+          content: Text('Login gagal'),
+          backgroundColor: Colors.red,
+        ),
       );
     }
   }
